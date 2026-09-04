@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["manuscript"]
+}
+
+model User {
+  id         String   @id @default(cuid())
+  supabaseId String   @unique
+  email      String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  manuscripts Manuscript[]
+  assets      ManuscriptAsset[]
+
+  @@map("users")
+  @@schema("manuscript")
+}
+
+model Manuscript {
+  id         String   @id @default(cuid())
+  title      String
+  styleId    String   @default("royal")
+  pageFormat String   @default("A4")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  ownerId String
+  owner   User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  pages   ManuscriptPage[]
+  assets  ManuscriptAsset[]
+
+  @@index([ownerId])
+  @@map("manuscripts")
+  @@schema("manuscript")
+}
+
+model ManuscriptPage {
+  id        String   @id @default(cuid())
+  position  Int
+  content   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  manuscriptId String
+  manuscript   Manuscript @relation(fields: [manuscriptId], references: [id], onDelete: Cascade)
+
+  @@unique([manuscriptId, position])
+  @@index([manuscriptId])
+  @@map("pages")
+  @@schema("manuscript")
+}
+
+model ManuscriptAsset {
+  id          String   @id @default(cuid())
+  storagePath String   @unique
+  mimeType    String
+  fileName    String?
+  width       Int?
+  height      Int?
+  attribution String?
+  license     String?
+  createdAt   DateTime @default(now())
+
+  ownerId      String
+  owner        User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  manuscriptId String?
+  manuscript   Manuscript? @relation(fields: [manuscriptId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@index([manuscriptId])
+  @@map("assets")
+  @@schema("manuscript")
+}
