@@ -3,6 +3,7 @@ import { Trash2 } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { DeleteAccountDialog } from "@/components/account/delete-account-dialog";
 import { FramedHeader } from "@/components/shell/framed-header";
+import { LegalFooter } from "@/components/legal/legal-footer";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -16,7 +17,7 @@ export default async function AccountPage() {
   const manuscriptCount = await prisma.manuscript.count({ where: { ownerId: user.id } });
 
   return (
-    <div className="min-h-screen bg-background text-zinc-100">
+    <div className="flex min-h-screen flex-col bg-background text-zinc-100">
       <FramedHeader toolName="← Manuscript Builder" href="/" maxWidth="max-w-xl">
         <form action={signOut}>
           <button type="submit" className="cursor-pointer text-xs text-zinc-500 transition-colors hover:text-zinc-300">
@@ -25,7 +26,7 @@ export default async function AccountPage() {
         </form>
       </FramedHeader>
 
-      <main className="mx-auto max-w-xl px-6 py-10">
+      <main className="mx-auto w-full max-w-xl flex-1 px-6 py-10">
         <h1 className="text-2xl font-medium tracking-tight">Account</h1>
 
         <section className="mt-6 divide-y divide-zinc-800 rounded-xl border border-zinc-700 bg-surface-1 px-4">
@@ -56,6 +57,7 @@ export default async function AccountPage() {
           <div className="mt-4"><DeleteAccountDialog email={user.email} /></div>
         </section>
       </main>
+      <LegalFooter />
     </div>
   );
 }

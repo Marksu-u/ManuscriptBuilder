@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WorkspaceAccountChip } from '@/components/workspace-account-chip';
 import { WorkspaceToolbar } from '@/components/workspace-toolbar';
+import { LegalLinks } from '@/components/legal/legal-footer';
 import { triggerJsonDownload } from '@/lib/export';
 
 type ThemeId = 'royal' | 'arcane' | 'datapad' | 'dossier';
@@ -401,6 +402,10 @@ export default function Home() {
                         <span className={`theme-swatch theme-${id}`} /><span><strong>{item.name}</strong><small>{item.family}</small></span>
                       </button>
                     ))}
+                  </div>
+                  <div className="mt-6 border-t border-zinc-800 pt-4">
+                    <p className="mb-3 text-xs font-medium text-zinc-400">About Manuscript Builder</p>
+                    <LegalLinks />
                   </div>
                 </TabsContent>
                 <TabsContent value="page" className="inspector-content">

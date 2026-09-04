@@ -51,3 +51,15 @@ pnpm build
 
 Deployment-specific values are documented in `.env.example` and configured in
 the hosting environment rather than in this README.
+
+## Legal pages
+
+Manuscript Builder serves its own `/legal`, `/privacy`, `/terms`, and `/cookies`
+pages. They are public and do not depend on authentication. Links are available
+on sign-in and account pages and in the workspace's Settings panel.
+
+Publisher and contact details live in `lib/legal.ts`; shared document styling
+and navigation live in `components/legal`. The policies describe the current
+editor: drafts and imported images stay in browser storage even when signed in,
+and no analytics integration is enabled. Update the policies and their revision
+date when storage, account behavior, providers, or tracking change.

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { signInWithGoogle } from "@/app/actions/auth";
+import { LegalFooter } from "@/components/legal/legal-footer";
+import { FramedHeader } from "@/components/shell/framed-header";
 
 const errors: Record<string, string> = {
   auth_callback_failed: "We couldn't complete your sign-in. Please try again.",
@@ -31,11 +33,11 @@ function LoginContent() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4">
+    <main className="flex flex-1 items-center justify-center bg-background px-4 py-16">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight text-zinc-100">Sign in</h1>
-          <p className="text-sm text-zinc-400">Save your manuscripts and access them from any device.</p>
+          <p className="text-sm text-zinc-400">Use your Bag Of Holding Tools account. Manuscript drafts stay in this browser.</p>
         </div>
 
         <div className="space-y-3">
@@ -53,9 +55,9 @@ function LoginContent() {
 
           <p className="text-center text-xs text-zinc-500">
             By continuing, you agree to the{" "}
-            <a href="https://dynasty.bagofholdingtools.com/terms" className="underline hover:text-zinc-300">Terms</a>
+            <Link href="/terms" className="underline hover:text-zinc-300">Terms</Link>
             {" "}and acknowledge the{" "}
-            <a href="https://dynasty.bagofholdingtools.com/privacy" className="underline hover:text-zinc-300">Privacy Policy</a>.
+            <Link href="/privacy" className="underline hover:text-zinc-300">Privacy Policy</Link>.
           </p>
         </div>
 
@@ -80,5 +82,11 @@ function GoogleMark() {
 }
 
 export default function LoginPage() {
-  return <Suspense fallback={null}><LoginContent /></Suspense>;
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      <FramedHeader maxWidth="max-w-2xl" />
+      <Suspense fallback={<main className="flex-1" aria-label="Loading sign-in" />}><LoginContent /></Suspense>
+      <LegalFooter />
+    </div>
+  );
 }
