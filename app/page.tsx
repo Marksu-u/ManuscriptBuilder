@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AccountControl } from '@/components/account-control';
 
 type ThemeId = 'royal' | 'arcane' | 'datapad' | 'dossier';
 type TextAlign = 'left' | 'center' | 'right';
@@ -240,6 +241,8 @@ export default function Home() {
       },
     });
     return () => lifecycle.abort();
+  // The browser tool registrations are replaced only when the active page changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active.id]);
 
   return (
@@ -274,7 +277,7 @@ export default function Home() {
         </div>
 
         <div className="top-right-actions">
-          <div className="save-chip floating-chrome"><Check /><span>{saved ? 'Saved' : 'Saving…'}</span></div>
+          <div className="save-chip floating-chrome"><Check /><span>{saved ? 'Saved locally' : 'Saving…'}</span></div>
           <DropdownMenu>
             <DropdownMenuTrigger render={<button type="button" className="accent-action" aria-label="Export manuscript" />}>
               <Download /> Export
@@ -378,6 +381,7 @@ export default function Home() {
                 <TabsContent value="page" className="inspector-content">
                   <Field label="Manuscript name"><input value={manuscript.name} maxLength={80} onChange={(event) => commit((current) => ({ ...current, name: event.target.value }))} /></Field>
                   <Field label="Format"><div className="property-row"><span>Page size</span><strong>A4 portrait</strong></div><div className="property-row"><span>Numbering</span><strong>Visible</strong></div></Field>
+                  <Field label="Account"><AccountControl /></Field>
                 </TabsContent>
                 <footer><button type="button" className="saved-button" disabled><Check /> {saved ? 'Saved' : 'Saving…'}</button><button type="button" className="trash-button" disabled={manuscript.pages.length === 1} onClick={deletePage} aria-label="Delete page"><Trash2 /></button></footer>
               </form>
