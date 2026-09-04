@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import { Contact, LegalDoc, LegalLink, Section } from "@/components/legal/legal-doc";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Cookie Policy · Manuscript Builder",
   description: "Browser storage and essential sign-in cookies used by Manuscript Builder.",
-  robots: { index: false, follow: true },
-};
+  path: "/cookies", noindex: true,
+});
 
 export default function CookiesPage() {
   return (

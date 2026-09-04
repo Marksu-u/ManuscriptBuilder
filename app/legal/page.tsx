@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import { Contact, LegalDoc, LegalLink, Section } from "@/components/legal/legal-doc";
 import { HOST, PUBLISHER_ALIAS } from "@/lib/legal";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Legal Notice · Manuscript Builder",
   description: "Publisher, hosting and contact details for Manuscript Builder.",
-  robots: { index: false, follow: true },
-};
+  path: "/legal", noindex: true,
+});
 
 export default function LegalNoticePage() {
   return (

@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import { Contact, LegalDoc, LegalLink, Section } from "@/components/legal/legal-doc";
 import { HOST, PUBLISHER_ALIAS } from "@/lib/legal";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Privacy Policy · Manuscript Builder",
   description: "How Manuscript Builder handles local drafts, optional sign-in and personal data.",
-  robots: { index: false, follow: true },
-};
+  path: "/privacy", noindex: true,
+});
 
 export default function PrivacyPage() {
   return (

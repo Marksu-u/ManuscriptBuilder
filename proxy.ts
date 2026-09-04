@@ -3,8 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { LEGAL_LINKS } from "@/lib/legal";
 
 export async function proxy(request: NextRequest) {
-  // Legal documents stay public even if account services are unavailable.
-  if (LEGAL_LINKS.some(({ href }) => request.nextUrl.pathname === href)) {
+  // Legal documents and social cards stay public without an auth round trip.
+  if (request.nextUrl.pathname === '/opengraph-image' || LEGAL_LINKS.some(({ href }) => request.nextUrl.pathname === href)) {
     return NextResponse.next();
   }
   const response = NextResponse.next({ request });

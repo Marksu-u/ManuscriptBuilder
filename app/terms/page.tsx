@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import { Contact, LegalDoc, LegalLink, Section } from "@/components/legal/legal-doc";
 import { PUBLISHER_ALIAS } from "@/lib/legal";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Terms of Use · Manuscript Builder",
   description: "Terms for creating, saving and exporting documents with Manuscript Builder.",
-  robots: { index: false, follow: true },
-};
+  path: "/terms", noindex: true,
+});
 
 export default function TermsPage() {
   return (

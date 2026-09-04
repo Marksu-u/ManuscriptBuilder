@@ -120,7 +120,7 @@ button { cursor: pointer; }
 .ornament::before, .ornament::after { content: ''; flex: 1; height: 1px; background: currentColor; opacity: .6; }
 .ornament-top { top: 45px; } .ornament-bottom { bottom: 40px; transform: rotate(180deg); }
 .manuscript-kicker { position: relative; margin: 0 0 21px; color: var(--paper-accent); font: 700 10px/1.2 var(--font-geist-mono); letter-spacing: .2em; text-align: center; }
-.manuscript-page h1 { position: relative; max-width: 390px; margin: 0 auto; font-size: 31px; line-height: 1.14; font-weight: 600; letter-spacing: -.02em; text-align: center; }
+.manuscript-page h2 { position: relative; max-width: 390px; margin: 0 auto; font-size: 31px; line-height: 1.14; font-weight: 600; letter-spacing: -.02em; text-align: center; }
 .title-rule { position: relative; display: flex; width: 130px; height: 18px; align-items: center; justify-content: center; margin: 21px auto 25px; border-top: 1px solid color-mix(in srgb,var(--paper-accent) 55%,transparent); }
 .title-rule span { width: 8px; height: 8px; margin-top: -18px; background: var(--paper-accent); transform: rotate(45deg); }
 .manuscript-image { position: relative; display: block; width: 100%; max-height: 210px; margin: 0 auto 20px; border: 1px solid color-mix(in srgb,var(--paper-accent) 42%,transparent); object-fit: cover; filter: saturate(.72) contrast(1.04); }

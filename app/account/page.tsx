@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/site";
 import { Trash2 } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { DeleteAccountDialog } from "@/components/account/delete-account-dialog";
@@ -7,10 +7,11 @@ import { LegalFooter } from "@/components/legal/legal-footer";
 import { getAuthUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Account · Manuscript Builder",
-  robots: { index: false, follow: true },
-};
+  description: "Manage your Manuscript Builder account and shared sign-in.",
+  path: "/account", noindex: true,
+});
 
 export default async function AccountPage() {
   const user = await getAuthUser();
