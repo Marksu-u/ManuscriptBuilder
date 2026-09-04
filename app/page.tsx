@@ -4,14 +4,15 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { toPng } from 'html-to-image';
 import {
-  AlignCenter, AlignLeft, AlignRight, Check, Download, FilePlus2,
-  Files, ImagePlus, Italic, Maximize2, Minus, Plus, Redo2, Settings, Sparkles,
-  Square, Trash2, Undo2, X,
+  AlignCenter, AlignLeft, AlignRight, Check, FilePlus2,
+  ImagePlus, Italic, Minus, Plus, Settings, Sparkles, Square, Trash2, X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WorkspaceAccountChip } from '@/components/workspace-account-chip';
+import { WorkspaceToolbar } from '@/components/workspace-toolbar';
+import { triggerJsonDownload } from '@/lib/export';
 
 type ThemeId = 'royal' | 'arcane' | 'datapad' | 'dossier';
 type TextAlign = 'left' | 'center' | 'right';
@@ -82,6 +83,7 @@ export default function Home() {
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const pageRef = useRef<HTMLElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const active = useMemo(
     () => manuscript.pages.find((page) => page.id === manuscript.activeId) ?? manuscript.pages[0],
@@ -216,6 +218,24 @@ export default function Home() {
     }
   }
 
+  function downloadJson() {
+    const baseName = manuscript.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    triggerJsonDownload(manuscript, `${baseName || 'manuscript'}.json`);
+  }
+
+  async function importJson(file?: File) {
+    if (!file) return;
+    try {
+      const parsed: unknown = JSON.parse(await file.text());
+      if (!validManuscript(parsed)) throw new Error('Invalid manuscript file');
+      commit(() => parsed);
+      setPagesOpen(true);
+    } catch (error) {
+      console.error('JSON import failed:', error);
+      window.alert('This JSON file is not a valid manuscript.');
+    }
+  }
+
   useEffect(() => {
     const context = document.modelContext;
     if (!context?.registerTool) return;
@@ -256,17 +276,28 @@ export default function Home() {
   return (
     <main className="app-shell">
       <section className="canvas-area" aria-label="Manuscript workspace">
-        <div className="top-left-tools floating-chrome">
-          <ToolButton label="Fit page" onClick={() => setZoom(78)}><Maximize2 /></ToolButton>
-          <ToolButton label="Pages" active={pagesOpen} onClick={() => setPagesOpen((open) => !open)}><Files /></ToolButton>
-          <Divider />
-          <ToolButton label="Undo" disabled={!canUndo} onClick={undo}><Undo2 /></ToolButton>
-          <ToolButton label="Redo" disabled={!canRedo} onClick={redo}><Redo2 /></ToolButton>
-          <Divider />
-          <ToolButton label="Export page as PNG" disabled={exporting} onClick={() => { void exportPng(); }}><Download /></ToolButton>
-          <Divider />
-          <button type="button" className="settings-button" onClick={() => { setInspectorOpen(true); setInspectorTab('style'); }}><Settings /> Settings</button>
-        </div>
+        <WorkspaceToolbar
+          pagesOpen={pagesOpen}
+          onTogglePages={() => setPagesOpen((open) => !open)}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onUndo={undo}
+          onRedo={redo}
+          onExportPng={() => { void exportPng(); }}
+          onExportJson={downloadJson}
+          onImportJson={() => importInputRef.current?.click()}
+          onFitView={() => setZoom(78)}
+          exporting={exporting}
+          extra={(
+            <button
+              type="button"
+              className="flex items-center gap-1.5 rounded px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+              onClick={() => { setInspectorOpen(true); setInspectorTab('style'); }}
+            >
+              <Settings className="h-3.5 w-3.5" /> Settings
+            </button>
+          )}
+        />
 
         <div className="identity-chip floating-chrome">
           <span className="manuscript-mark"><Sparkles /></span>
@@ -276,9 +307,6 @@ export default function Home() {
 
         <div className="top-right-actions">
           <WorkspaceAccountChip saved={saved} />
-          <button type="button" className="accent-action" disabled={exporting} onClick={() => { void exportPng(); }} aria-label="Export current page as PNG">
-            <Download /> {exporting ? 'Exporting…' : 'Export PNG'}
-          </button>
         </div>
 
         {pagesOpen && (
@@ -382,6 +410,7 @@ export default function Home() {
         )}
 
         <input ref={imageInputRef} hidden type="file" accept="image/*" onChange={(event) => { chooseImage(event.target.files?.[0]); event.target.value = ''; }} />
+        <input ref={importInputRef} hidden type="file" accept="application/json,.json" onChange={(event) => { void importJson(event.target.files?.[0]); event.target.value = ''; }} />
       </section>
     </main>
   );
@@ -390,8 +419,6 @@ export default function Home() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <label className="field"><span>{label}</span>{children}</label>;
 }
-
-function Divider() { return <span className="tool-divider" aria-hidden="true" />; }
 
 function ToolButton({ label, onClick, active, disabled, children }: { label: string; onClick: () => void; active?: boolean; disabled?: boolean; children: React.ReactNode }) {
   return <button type="button" className={`tool-button ${active ? 'active' : ''}`} onClick={onClick} disabled={disabled} title={label} aria-label={label}>{children}</button>;

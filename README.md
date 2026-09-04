@@ -14,6 +14,7 @@ workspace layout, and optional account system.
 - Titles, body text, bold and italic markup, text alignment, and illustrations.
 - Page management, undo and redo, zoom controls, and a focused inspector.
 - High-resolution PNG export of the current page.
+- JSON download and import for editable manuscript backups.
 - Automatic guest-draft saving in browser local storage.
 - Optional Google sign-in through the shared Bag Of Holding Tools account.
 
