@@ -21,6 +21,9 @@ export async function proxy(request: NextRequest) {
   if (user && request.nextUrl.pathname === "/login") {
     return NextResponse.redirect(new URL("/", request.url));
   }
+  if (!user && request.nextUrl.pathname.startsWith("/account")) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
   return response;
 }
 
