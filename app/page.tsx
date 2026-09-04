@@ -276,37 +276,41 @@ export default function Home() {
   return (
     <main className="app-shell">
       <section className="canvas-area" aria-label="Manuscript workspace">
-        <WorkspaceToolbar
-          pagesOpen={pagesOpen}
-          onTogglePages={() => setPagesOpen((open) => !open)}
-          canUndo={canUndo}
-          canRedo={canRedo}
-          onUndo={undo}
-          onRedo={redo}
-          onExportPng={() => { void exportPng(); }}
-          onExportJson={downloadJson}
-          onImportJson={() => importInputRef.current?.click()}
-          onFitView={() => setZoom(78)}
-          exporting={exporting}
-          extra={(
-            <button
-              type="button"
-              className="flex items-center gap-1.5 rounded px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
-              onClick={() => { setInspectorOpen(true); setInspectorTab('style'); }}
-            >
-              <Settings className="h-3.5 w-3.5" /> Settings
-            </button>
-          )}
-        />
+        <div className="workspace-header">
+          <WorkspaceToolbar
+            pagesOpen={pagesOpen}
+            onTogglePages={() => setPagesOpen((open) => !open)}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onUndo={undo}
+            onRedo={redo}
+            onExportPng={() => { void exportPng(); }}
+            onExportJson={downloadJson}
+            onImportJson={() => importInputRef.current?.click()}
+            onFitView={() => setZoom(78)}
+            exporting={exporting}
+            extra={(
+              <button
+                type="button"
+                className="workspace-settings flex items-center gap-1.5 rounded px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                title="Settings"
+                aria-label="Settings"
+                onClick={() => { setInspectorOpen(true); setInspectorTab('style'); }}
+              >
+                <Settings className="h-3.5 w-3.5" /><span>Settings</span>
+              </button>
+            )}
+          />
 
-        <div className="identity-chip floating-chrome">
-          <span className="manuscript-mark"><Sparkles /></span>
-          <span className="identity-name">{manuscript.name}</span>
-          <span className="identity-stats">{manuscript.pages.length} · A4</span>
-        </div>
+          <div className="identity-chip floating-chrome">
+            <span className="manuscript-mark" aria-hidden="true"><Sparkles /></span>
+            <span className="identity-name" title={manuscript.name}>{manuscript.name}</span>
+            <span className="identity-stats">{manuscript.pages.length} · A4</span>
+          </div>
 
-        <div className="top-right-actions">
-          <WorkspaceAccountChip saved={saved} />
+          <div className="top-right-actions">
+            <WorkspaceAccountChip saved={saved} />
+          </div>
         </div>
 
         {pagesOpen && (

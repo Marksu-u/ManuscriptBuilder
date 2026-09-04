@@ -50,12 +50,22 @@ export function WorkspaceToolbar({
         setExportOpen(false);
       }
     }
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setExportOpen(false);
+        exportRef.current?.querySelector('button')?.focus();
+      }
+    }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, [exportOpen]);
 
   return (
-    <div className="absolute left-4 top-4 z-20 flex items-center gap-0.5 rounded-lg border border-zinc-700 bg-zinc-900/95 p-1 shadow-lg backdrop-blur-sm">
+    <nav aria-label="Manuscript tools" className="workspace-toolbar flex items-center gap-0.5 rounded-lg border border-zinc-700 bg-zinc-900/95 p-1 shadow-lg backdrop-blur-sm">
       <button
         type="button"
         onClick={onFitView}
@@ -77,6 +87,7 @@ export function WorkspaceToolbar({
         ].join(' ')}
         title="Pages"
         aria-label="Pages"
+        aria-pressed={pagesOpen}
       >
         <Files size={14} />
       </button>
@@ -156,6 +167,6 @@ export function WorkspaceToolbar({
           {extra}
         </>
       )}
-    </div>
+    </nav>
   );
 }
