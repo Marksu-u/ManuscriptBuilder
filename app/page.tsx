@@ -2,16 +2,13 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
+import { toPng } from 'html-to-image';
 import {
-  AlignCenter, AlignLeft, AlignRight, Check, ChevronDown, Download, FilePlus2,
+  AlignCenter, AlignLeft, AlignRight, Check, Download, FilePlus2,
   Files, ImagePlus, Italic, Maximize2, Minus, Plus, Redo2, Settings, Sparkles,
   Square, Trash2, Undo2, X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AccountControl } from '@/components/account-control';
@@ -79,11 +76,12 @@ export default function Home() {
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>('details');
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const undoStack = useRef<Manuscript[]>([]);
   const redoStack = useRef<Manuscript[]>([]);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const pageRef = useRef<HTMLElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const importInputRef = useRef<HTMLInputElement>(null);
 
   const active = useMemo(
     () => manuscript.pages.find((page) => page.id === manuscript.activeId) ?? manuscript.pages[0],
@@ -192,20 +190,30 @@ export default function Home() {
     reader.readAsDataURL(file);
   }
 
-  function downloadJson() {
-    const blob = new Blob([JSON.stringify(manuscript, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob); const link = document.createElement('a');
-    link.href = url; link.download = `${manuscript.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'manuscript'}.json`;
-    link.click(); URL.revokeObjectURL(url);
-  }
-
-  async function importJson(file?: File) {
-    if (!file) return;
+  async function exportPng() {
+    const page = pageRef.current;
+    if (!page || exporting) return;
+    setExporting(true);
     try {
-      const parsed: unknown = JSON.parse(await file.text());
-      if (!validManuscript(parsed)) throw new Error('Invalid manuscript');
-      commit(() => parsed); setPagesOpen(true);
-    } catch { window.alert('This file is not a valid Manuscript Builder document.'); }
+      if (document.fonts?.ready) await document.fonts.ready;
+      const dataUrl = await toPng(page, {
+        width: 560,
+        height: 792,
+        pixelRatio: 2,
+        cacheBust: true,
+        style: { transform: 'none', margin: '0' },
+      });
+      const link = document.createElement('a');
+      const baseName = `${manuscript.name}-${activeIndex + 1}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      link.download = `${baseName || 'manuscript-page'}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (error) {
+      console.error('PNG export failed:', error);
+      window.alert('The PNG could not be generated. Please try again.');
+    } finally {
+      setExporting(false);
+    }
   }
 
   useEffect(() => {
@@ -255,17 +263,7 @@ export default function Home() {
           <ToolButton label="Undo" disabled={!canUndo} onClick={undo}><Undo2 /></ToolButton>
           <ToolButton label="Redo" disabled={!canRedo} onClick={redo}><Redo2 /></ToolButton>
           <Divider />
-          <DropdownMenu>
-            <DropdownMenuTrigger render={<button type="button" className="tool-button" aria-label="Document menu" title="Document menu" />}>
-              <Download /><ChevronDown className="chevron" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="document-menu">
-              <DropdownMenuItem onClick={() => window.print()}><Download /> Print or save PDF</DropdownMenuItem>
-              <DropdownMenuItem onClick={downloadJson}><Download /> Export editable file</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => importInputRef.current?.click()}>Import editable file</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ToolButton label="Export page as PNG" disabled={exporting} onClick={() => { void exportPng(); }}><Download /></ToolButton>
           <Divider />
           <button type="button" className="settings-button" onClick={() => { setInspectorOpen(true); setInspectorTab('style'); }}><Settings /> Settings</button>
         </div>
@@ -278,15 +276,9 @@ export default function Home() {
 
         <div className="top-right-actions">
           <div className="save-chip floating-chrome"><Check /><span>{saved ? 'Saved locally' : 'Saving…'}</span></div>
-          <DropdownMenu>
-            <DropdownMenuTrigger render={<button type="button" className="accent-action" aria-label="Export manuscript" />}>
-              <Download /> Export
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="document-menu">
-              <DropdownMenuItem onClick={() => window.print()}>Print or save PDF</DropdownMenuItem>
-              <DropdownMenuItem onClick={downloadJson}>Export editable file</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <button type="button" className="accent-action" disabled={exporting} onClick={() => { void exportPng(); }} aria-label="Export current page as PNG">
+            <Download /> {exporting ? 'Exporting…' : 'Export PNG'}
+          </button>
         </div>
 
         {pagesOpen && (
@@ -306,6 +298,7 @@ export default function Home() {
 
         <div className={`page-stage ${inspectorOpen ? 'inspector-visible' : ''} ${pagesOpen ? 'pages-visible' : ''}`}>
           <article
+            ref={pageRef}
             className={`manuscript-page theme-${manuscript.theme}`}
             style={{ transform: `scale(${zoom / 100})`, marginBottom: `${792 * (zoom / 100 - 1)}px` }}
           >
@@ -390,7 +383,6 @@ export default function Home() {
         )}
 
         <input ref={imageInputRef} hidden type="file" accept="image/*" onChange={(event) => { chooseImage(event.target.files?.[0]); event.target.value = ''; }} />
-        <input ref={importInputRef} hidden type="file" accept="application/json,.json" onChange={(event) => { void importJson(event.target.files?.[0]); event.target.value = ''; }} />
       </section>
     </main>
   );

@@ -63,6 +63,7 @@ button, input, textarea { font: inherit; } button { cursor: pointer; }
 .save-chip svg { width: 13px; height: 13px; color: #5dcaa5; }
 .accent-action { display: flex; height: 34px; align-items: center; gap: 7px; padding: 0 13px; border: 0; border-radius: 8px; color: #17120a; background: var(--accent); font-size: 12px; font-weight: 650; box-shadow: 0 7px 18px #0004; }
 .accent-action:hover { background: #f5ac3e; }
+.accent-action:disabled { cursor: wait; opacity: .65; }
 .accent-action svg { width: 14px; height: 14px; }
 .document-menu { min-width: 185px; border: 1px solid var(--border); background: #121829; }
 .document-menu [data-slot='dropdown-menu-item'] { gap: 8px; padding: 7px 9px; color: #b3bfda; }
