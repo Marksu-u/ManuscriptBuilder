@@ -1,36 +1,39 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import {
-  AlignCenter, AlignLeft, Bold, Download, FilePlus2, ImagePlus, Italic,
-  Minus, Plus, Redo2, Sparkles, Trash2, Undo2,
+  AlignCenter, AlignLeft, AlignRight, Check, ChevronDown, Download, FilePlus2,
+  Files, ImagePlus, Italic, Maximize2, Minus, Plus, Redo2, Settings, Sparkles,
+  Square, Trash2, Undo2, X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select';
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type ThemeId = 'royal' | 'arcane' | 'datapad' | 'dossier';
-type Page = { id: number; title: string; body: string };
+type TextAlign = 'left' | 'center' | 'right';
+type InspectorTab = 'details' | 'style' | 'page';
+type Page = { id: string; title: string; body: string; align: TextAlign; image?: string };
+type Manuscript = { name: string; pages: Page[]; activeId: string; theme: ThemeId };
 
 type WebMcpTool = {
-  name: string;
-  title: string;
-  description: string;
-  inputSchema: Record<string, unknown>;
+  name: string; title: string; description: string; inputSchema: Record<string, unknown>;
   annotations: { readOnlyHint: boolean; untrustedContentHint: boolean };
   execute: (input: unknown) => unknown;
 };
 
 declare global {
   interface Document {
-    modelContext?: {
-      registerTool: (tool: WebMcpTool, options?: { signal?: AbortSignal }) => void | Promise<void>;
-    };
+    modelContext?: { registerTool: (tool: WebMcpTool, options?: { signal?: AbortSignal }) => void | Promise<void> };
   }
 }
 
+const STORAGE_KEY = 'boh-manuscript-v1';
 const themes: Record<ThemeId, { name: string; family: string; label: string }> = {
   royal: { name: 'Royal decree', family: 'Medieval', label: 'BY ORDER OF THE CROWN' },
   arcane: { name: 'Arcane grimoire', family: 'Fantasy', label: 'THE THIRD CONJURATION' },
@@ -38,235 +41,363 @@ const themes: Record<ThemeId, { name: string; family: string; label: string }> =
   dossier: { name: 'Field dossier', family: 'Modern', label: 'EYES ONLY // CASE 47' },
 };
 
-const starterPages: Page[] = [
-  {
-    id: 1,
-    title: 'A summons to Blackmere Keep',
-    body: 'Let it be known that, on the first night of the waning moon, those named below are called to the old keep at Blackmere.\n\nBring neither herald nor banner. Speak of this journey to no soul, for the roads are watched and the ravens no longer carry messages for the crown.',
-  },
-  { id: 2, title: 'The sealed instruction', body: 'Break this seal only when the western bell sounds twice.' },
-];
+const INITIAL: Manuscript = {
+  name: 'The Blackmere summons', theme: 'royal', activeId: 'page-1',
+  pages: [
+    {
+      id: 'page-1', title: 'A summons to Blackmere Keep', align: 'left',
+      body: 'Let it be known that, on the first night of the waning moon, those named below are called to the old keep at Blackmere.\n\nBring neither herald nor banner. Speak of this journey to no soul, for the roads are watched and the ravens no longer carry messages for the crown.',
+    },
+    { id: 'page-2', title: 'The sealed instruction', align: 'left', body: 'Break this seal only when the western bell sounds twice.' },
+  ],
+};
+
+function inlineMarkup(text: string) {
+  return text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) return <strong key={index}>{part.slice(2, -2)}</strong>;
+    if (part.startsWith('*') && part.endsWith('*')) return <em key={index}>{part.slice(1, -1)}</em>;
+    return <Fragment key={index}>{part}</Fragment>;
+  });
+}
+
+function validManuscript(value: unknown): value is Manuscript {
+  if (!value || typeof value !== 'object') return false;
+  const item = value as Partial<Manuscript>;
+  return typeof item.name === 'string' && typeof item.activeId === 'string' &&
+    typeof item.theme === 'string' && item.theme in themes && Array.isArray(item.pages) && item.pages.length > 0 &&
+    item.pages.every((page) => page && typeof page.id === 'string' && typeof page.title === 'string' && typeof page.body === 'string');
+}
 
 export default function Home() {
-  const [pages, setPages] = useState<Page[]>(starterPages);
-  const [activeId, setActiveId] = useState(1);
-  const [theme, setTheme] = useState<ThemeId>('royal');
-  const [zoom, setZoom] = useState(82);
+  const [manuscript, setManuscript] = useState<Manuscript>(INITIAL);
   const [saved, setSaved] = useState(true);
-  const active = useMemo(() => pages.find((page) => page.id === activeId) ?? pages[0], [activeId, pages]);
+  const [hydrated, setHydrated] = useState(false);
+  const [zoom, setZoom] = useState(78);
+  const [pagesOpen, setPagesOpen] = useState(false);
+  const [inspectorOpen, setInspectorOpen] = useState(true);
+  const [inspectorTab, setInspectorTab] = useState<InspectorTab>('details');
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
+  const undoStack = useRef<Manuscript[]>([]);
+  const redoStack = useRef<Manuscript[]>([]);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
+
+  const active = useMemo(
+    () => manuscript.pages.find((page) => page.id === manuscript.activeId) ?? manuscript.pages[0],
+    [manuscript],
+  );
+  const activeIndex = manuscript.pages.findIndex((page) => page.id === active.id);
 
   useEffect(() => {
-    if (saved) return;
-    const timer = window.setTimeout(() => setSaved(true), 650);
+    const timer = window.setTimeout(() => {
+      try {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed: unknown = JSON.parse(raw);
+          if (validManuscript(parsed)) setManuscript(parsed);
+        }
+      } catch { /* An unreadable local draft falls back to the example. */ }
+      setHydrated(true);
+    }, 0);
     return () => window.clearTimeout(timer);
-  }, [saved, pages, theme]);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated || saved) return;
+    const timer = window.setTimeout(() => {
+      try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(manuscript)); } catch { /* Keep editing if storage is full. */ }
+      setSaved(true);
+    }, 450);
+    return () => window.clearTimeout(timer);
+  }, [hydrated, manuscript, saved]);
+
+  function commit(change: (current: Manuscript) => Manuscript) {
+    setManuscript((current) => {
+      undoStack.current = [...undoStack.current.slice(-49), current];
+      redoStack.current = [];
+      return change(current);
+    });
+    setCanUndo(true);
+    setCanRedo(false);
+    setSaved(false);
+  }
+
+  function updateActive(patch: Partial<Page>) {
+    commit((current) => ({
+      ...current,
+      pages: current.pages.map((page) => page.id === current.activeId ? { ...page, ...patch } : page),
+    }));
+  }
+
+  function undo() {
+    const previous = undoStack.current.at(-1);
+    if (!previous) return;
+    setManuscript((current) => { redoStack.current.push(current); return previous; });
+    undoStack.current.pop();
+    setCanUndo(undoStack.current.length > 0); setCanRedo(true); setSaved(false);
+  }
+
+  function redo() {
+    const next = redoStack.current.at(-1);
+    if (!next) return;
+    setManuscript((current) => { undoStack.current.push(current); return next; });
+    redoStack.current.pop();
+    setCanRedo(redoStack.current.length > 0); setCanUndo(true); setSaved(false);
+  }
+
+  useEffect(() => {
+    const keydown = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== 'z') return;
+      const target = event.target as HTMLElement | null;
+      if (target?.matches('input, textarea') || target?.isContentEditable) return;
+      event.preventDefault();
+      if (event.shiftKey) redo(); else undo();
+    };
+    window.addEventListener('keydown', keydown);
+    return () => window.removeEventListener('keydown', keydown);
+  });
+
+  function addPage() {
+    const id = crypto.randomUUID();
+    commit((current) => ({ ...current, activeId: id, pages: [...current.pages, { id, title: 'Untitled page', body: 'Begin writing here…', align: 'left' }] }));
+    setPagesOpen(true); setInspectorOpen(true); setInspectorTab('details');
+  }
+
+  function deletePage() {
+    if (manuscript.pages.length === 1) return;
+    commit((current) => {
+      const index = current.pages.findIndex((page) => page.id === current.activeId);
+      const pages = current.pages.filter((page) => page.id !== current.activeId);
+      return { ...current, pages, activeId: pages[Math.max(0, index - 1)].id };
+    });
+  }
+
+  function wrapSelection(mark: '*' | '**') {
+    const field = bodyRef.current;
+    if (!field) return;
+    const start = field.selectionStart; const end = field.selectionEnd;
+    const selected = active.body.slice(start, end) || (mark === '**' ? 'bold text' : 'italic text');
+    const body = `${active.body.slice(0, start)}${mark}${selected}${mark}${active.body.slice(end)}`;
+    updateActive({ body });
+    requestAnimationFrame(() => { field.focus(); field.setSelectionRange(start + mark.length, start + mark.length + selected.length); });
+  }
+
+  function chooseImage(file?: File) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => { if (typeof reader.result === 'string') updateActive({ image: reader.result }); };
+    reader.readAsDataURL(file);
+  }
+
+  function downloadJson() {
+    const blob = new Blob([JSON.stringify(manuscript, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob); const link = document.createElement('a');
+    link.href = url; link.download = `${manuscript.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'manuscript'}.json`;
+    link.click(); URL.revokeObjectURL(url);
+  }
+
+  async function importJson(file?: File) {
+    if (!file) return;
+    try {
+      const parsed: unknown = JSON.parse(await file.text());
+      if (!validManuscript(parsed)) throw new Error('Invalid manuscript');
+      commit(() => parsed); setPagesOpen(true);
+    } catch { window.alert('This file is not a valid Manuscript Builder document.'); }
+  }
 
   useEffect(() => {
     const context = document.modelContext;
     if (!context?.registerTool) return;
     const lifecycle = new AbortController();
     const register = (tool: WebMcpTool) => {
-      try {
-        void Promise.resolve(context.registerTool(tool, { signal: lifecycle.signal })).catch(() => undefined);
-      } catch { /* An unsupported implementation should not affect the editor. */ }
+      try { void Promise.resolve(context.registerTool(tool, { signal: lifecycle.signal })).catch(() => undefined); } catch { /* optional API */ }
     };
-
     register({
-      name: 'set_manuscript_style',
-      title: 'Set manuscript style',
-      description: 'Change the visible manuscript to one of the available presentation styles.',
-      inputSchema: {
-        type: 'object', properties: { style: { type: 'string', enum: Object.keys(themes) } },
-        required: ['style'], additionalProperties: false,
-      },
+      name: 'set_manuscript_style', title: 'Set manuscript style',
+      description: 'Change the visible manuscript to an available presentation style.',
+      inputSchema: { type: 'object', properties: { style: { type: 'string', enum: Object.keys(themes) } }, required: ['style'], additionalProperties: false },
       annotations: { readOnlyHint: false, untrustedContentHint: false },
       execute(input) {
         const style = (input as { style?: string })?.style;
         if (!style || !(style in themes)) throw new Error('Unknown manuscript style');
-        setTheme(style as ThemeId); setSaved(false);
+        commit((current) => ({ ...current, theme: style as ThemeId }));
         return { style, name: themes[style as ThemeId].name };
       },
     });
-
     register({
-      name: 'update_active_page',
-      title: 'Update active manuscript page',
-      description: 'Replace the title and/or body text of the page currently open in the editor.',
-      inputSchema: {
-        type: 'object',
-        properties: { title: { type: 'string', maxLength: 120 }, body: { type: 'string', maxLength: 12000 } },
-        additionalProperties: false,
-      },
+      name: 'update_active_page', title: 'Update active manuscript page',
+      description: 'Replace the title and/or body of the page currently open in the editor.',
+      inputSchema: { type: 'object', properties: { title: { type: 'string', maxLength: 120 }, body: { type: 'string', maxLength: 12000 } }, additionalProperties: false },
       annotations: { readOnlyHint: false, untrustedContentHint: true },
       execute(input) {
-        const value = input as { title?: unknown; body?: unknown };
-        const patch: Partial<Page> = {};
+        const value = input as { title?: unknown; body?: unknown }; const patch: Partial<Page> = {};
         if (typeof value.title === 'string') patch.title = value.title;
         if (typeof value.body === 'string') patch.body = value.body;
         if (!Object.keys(patch).length) throw new Error('Provide a title or body');
-        setPages((current) => current.map((page) => page.id === activeId ? { ...page, ...patch } : page));
-        setSaved(false);
-        return { pageId: activeId, updated: Object.keys(patch) };
+        updateActive(patch); return { pageId: active.id, updated: Object.keys(patch) };
       },
     });
-
     return () => lifecycle.abort();
-  }, [activeId]);
-
-  function updatePage(patch: Partial<Page>) {
-    setPages((current) => current.map((page) => page.id === active.id ? { ...page, ...patch } : page));
-    setSaved(false);
-  }
-
-  function addPage() {
-    const id = Math.max(...pages.map((page) => page.id), 0) + 1;
-    setPages((current) => [...current, { id, title: 'Untitled page', body: 'Begin writing here…' }]);
-    setActiveId(id);
-    setSaved(false);
-  }
-
-  function removeActivePage() {
-    if (pages.length === 1) return;
-    const index = pages.findIndex((page) => page.id === activeId);
-    const next = pages.filter((page) => page.id !== activeId);
-    setPages(next);
-    setActiveId(next[Math.max(0, index - 1)].id);
-    setSaved(false);
-  }
+  }, [active.id]);
 
   return (
     <main className="app-shell">
-      <header className="app-header">
-        <div className="brand-lockup">
-          <div className="brand-mark" aria-hidden="true"><Sparkles size={16} /></div>
-          <div>
-            <p className="brand-name">Manuscript Builder</p>
-            <p className="document-name">A summons to Blackmere Keep</p>
-          </div>
+      <section className="canvas-area" aria-label="Manuscript workspace">
+        <div className="top-left-tools floating-chrome">
+          <ToolButton label="Fit page" onClick={() => setZoom(78)}><Maximize2 /></ToolButton>
+          <ToolButton label="Pages" active={pagesOpen} onClick={() => setPagesOpen((open) => !open)}><Files /></ToolButton>
+          <Divider />
+          <ToolButton label="Undo" disabled={!canUndo} onClick={undo}><Undo2 /></ToolButton>
+          <ToolButton label="Redo" disabled={!canRedo} onClick={redo}><Redo2 /></ToolButton>
+          <Divider />
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<button type="button" className="tool-button" aria-label="Document menu" title="Document menu" />}>
+              <Download /><ChevronDown className="chevron" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="document-menu">
+              <DropdownMenuItem onClick={() => window.print()}><Download /> Print or save PDF</DropdownMenuItem>
+              <DropdownMenuItem onClick={downloadJson}><Download /> Export editable file</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => importInputRef.current?.click()}>Import editable file</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Divider />
+          <button type="button" className="settings-button" onClick={() => { setInspectorOpen(true); setInspectorTab('style'); }}><Settings /> Settings</button>
         </div>
-        <div className="save-state" aria-live="polite">
-          <span className={saved ? 'save-dot' : 'save-dot saving'} />
-          {saved ? 'Saved locally' : 'Saving…'}
+
+        <div className="identity-chip floating-chrome">
+          <span className="manuscript-mark"><Sparkles /></span>
+          <span className="identity-name">{manuscript.name}</span>
+          <span className="identity-stats">{manuscript.pages.length} · A4</span>
         </div>
-        <div className="header-actions">
-          <Button variant="ghost" size="icon-sm" aria-label="Undo" disabled><Undo2 /></Button>
-          <Button variant="ghost" size="icon-sm" aria-label="Redo" disabled><Redo2 /></Button>
-          <Button className="export-button" onClick={() => window.print()}>
-            <Download data-icon="inline-start" /> Export
-          </Button>
+
+        <div className="top-right-actions">
+          <div className="save-chip floating-chrome"><Check /><span>{saved ? 'Saved' : 'Saving…'}</span></div>
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<button type="button" className="accent-action" aria-label="Export manuscript" />}>
+              <Download /> Export
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="document-menu">
+              <DropdownMenuItem onClick={() => window.print()}>Print or save PDF</DropdownMenuItem>
+              <DropdownMenuItem onClick={downloadJson}>Export editable file</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </header>
 
-      <div className="workspace">
-        <aside className="page-rail" aria-label="Manuscript pages">
-          <div className="rail-heading">
-            <span>Pages</span>
-            <Button variant="ghost" size="icon-sm" aria-label="Add page" onClick={addPage}><FilePlus2 /></Button>
-          </div>
-          <div className="page-list">
-            {pages.map((page, index) => (
-              <button key={page.id} className={`page-item ${page.id === activeId ? 'active' : ''}`} onClick={() => setActiveId(page.id)}>
-                <span className={`page-thumbnail theme-${theme}`}><i /><b /><b /><b /></span>
-                <span className="page-caption"><strong>{index + 1}</strong><span>{page.title}</span></span>
-              </button>
-            ))}
-          </div>
-          <Button variant="ghost" className="add-page" onClick={addPage}><Plus data-icon="inline-start" /> Add page</Button>
-        </aside>
+        {pagesOpen && (
+          <aside className="pages-panel floating-panel" aria-label="Manuscript pages">
+            <header><div><strong>Pages</strong><span>{manuscript.pages.length} in manuscript</span></div><button onClick={() => setPagesOpen(false)} aria-label="Close pages"><X /></button></header>
+            <div className="page-list">
+              {manuscript.pages.map((page, index) => (
+                <button aria-label={`Open page ${index + 1}: ${page.title}`} key={page.id} className={`page-item ${page.id === active.id ? 'active' : ''}`} onClick={() => setManuscript((current) => ({ ...current, activeId: page.id }))}>
+                  <span className={`page-thumbnail theme-${manuscript.theme}`}><i /><b /><b /><b /></span>
+                  <span className="page-caption"><strong>{String(index + 1).padStart(2, '0')}</strong><span>{page.title}</span></span>
+                </button>
+              ))}
+            </div>
+            <footer><Button className="primary-panel-button" onClick={addPage}><FilePlus2 /> Add page</Button></footer>
+          </aside>
+        )}
 
-        <section className="canvas-area" aria-label="Manuscript canvas">
-          <div className="canvas-tools" aria-label="Text formatting">
-            <Button variant="ghost" size="icon-sm" aria-label="Bold"><Bold /></Button>
-            <Button variant="ghost" size="icon-sm" aria-label="Italic"><Italic /></Button>
-            <span className="tool-divider" />
-            <Button variant="ghost" size="icon-sm" aria-label="Align left"><AlignLeft /></Button>
-            <Button variant="ghost" size="icon-sm" aria-label="Align center"><AlignCenter /></Button>
-            <span className="tool-divider" />
-            <Button variant="ghost" size="sm"><ImagePlus /> Image</Button>
-          </div>
-          <div className="page-stage">
-            <article className={`manuscript-page theme-${theme}`} style={{ transform: `scale(${zoom / 100})` }}>
-              <div className="paper-noise" />
-              <div className="ornament ornament-top"><span>✦</span></div>
-              <p className="manuscript-kicker">{themes[theme].label}</p>
-              <h1>{active.title}</h1>
-              <div className="title-rule"><span /></div>
-              <div className="manuscript-body">
-                {active.body.split('\n').map((line, index) => line ? <p key={index}>{line}</p> : <div className="paragraph-gap" key={index} />)}
-              </div>
-              <div className="seal" aria-label="Seal decoration"><span>BM</span></div>
-              <p className="signature">By my hand and seal</p>
-              <div className="ornament ornament-bottom"><span>✦</span></div>
-              <span className="folio">{pages.findIndex((page) => page.id === active.id) + 1}</span>
-            </article>
-          </div>
-          <div className="zoom-control">
-            <Button variant="ghost" size="icon-sm" aria-label="Zoom out" onClick={() => setZoom((value) => Math.max(50, value - 8))}><Minus /></Button>
-            <span>{zoom}%</span>
-            <Button variant="ghost" size="icon-sm" aria-label="Zoom in" onClick={() => setZoom((value) => Math.min(120, value + 8))}><Plus /></Button>
-          </div>
-        </section>
+        <div className={`page-stage ${inspectorOpen ? 'inspector-visible' : ''} ${pagesOpen ? 'pages-visible' : ''}`}>
+          <article
+            className={`manuscript-page theme-${manuscript.theme}`}
+            style={{ transform: `scale(${zoom / 100})`, marginBottom: `${792 * (zoom / 100 - 1)}px` }}
+          >
+            <div className="paper-noise" />
+            <div className="ornament ornament-top"><span>✦</span></div>
+            <p className="manuscript-kicker">{themes[manuscript.theme].label}</p>
+            <h1>{active.title}</h1>
+            <div className="title-rule"><span /></div>
+            {active.image && <Image unoptimized width={404} height={210} className="manuscript-image" src={active.image} alt="Uploaded manuscript illustration" />}
+            <div className="manuscript-body" style={{ textAlign: active.align }}>
+              {active.body.split('\n').map((line, index) => line ? <p key={index}>{inlineMarkup(line)}</p> : <div className="paragraph-gap" key={index} />)}
+            </div>
+            <div className="seal" aria-label="Seal decoration"><span>BM</span></div>
+            <p className="signature">By my hand and seal</p>
+            <div className="ornament ornament-bottom"><span>✦</span></div>
+            <span className="folio">{activeIndex + 1}</span>
+          </article>
+        </div>
 
-        <aside className="inspector" aria-label="Page inspector">
-          <Tabs defaultValue="content" className="h-full gap-0">
-            <TabsList variant="line" className="inspector-tabs">
-              <TabsTrigger value="content">Content</TabsTrigger>
-              <TabsTrigger value="style">Style</TabsTrigger>
-              <TabsTrigger value="page">Page</TabsTrigger>
-            </TabsList>
-            <TabsContent value="content" className="inspector-content">
-              <section className="control-section">
-                <label htmlFor="page-title">Title</label>
-                <input id="page-title" value={active.title} onChange={(event) => updatePage({ title: event.target.value })} />
-              </section>
-              <section className="control-section">
-                <label htmlFor="page-body">Body</label>
-                <textarea id="page-body" value={active.body} onChange={(event) => updatePage({ body: event.target.value })} rows={12} />
-                <p>{active.body.length} characters</p>
-              </section>
-              <section className="control-section">
-                <span className="control-label">Add to page</span>
-                <div className="block-grid">
-                  <button><span className="block-icon">T</span>Text</button>
-                  <button><ImagePlus />Image</button>
-                  <button><span className="block-icon">—</span>Divider</button>
-                  <button><span className="block-icon">◉</span>Seal</button>
-                </div>
-              </section>
-            </TabsContent>
-            <TabsContent value="style" className="inspector-content">
-              <section className="control-section">
-                <span className="control-label">Manuscript style</span>
-                <Select value={theme} onValueChange={(value) => { setTheme(value as ThemeId); setSaved(false); }}>
-                  <SelectTrigger className="theme-select"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(themes).map(([id, item]) => <SelectItem key={id} value={id}>{item.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </section>
-              <div className="theme-cards">
-                {(Object.entries(themes) as [ThemeId, (typeof themes)[ThemeId]][]).map(([id, item]) => (
-                  <button key={id} onClick={() => { setTheme(id); setSaved(false); }} className={theme === id ? 'selected' : ''}>
-                    <span className={`theme-swatch theme-${id}`} />
-                    <span><strong>{item.name}</strong><small>{item.family}</small></span>
-                  </button>
-                ))}
-              </div>
-            </TabsContent>
-            <TabsContent value="page" className="inspector-content">
-              <section className="control-section">
-                <span className="control-label">Format</span>
-                <div className="format-row"><span>Page size</span><strong>A4 portrait</strong></div>
-                <div className="format-row"><span>Margins</span><strong>Comfortable</strong></div>
-                <div className="format-row"><span>Numbering</span><strong>Visible</strong></div>
-              </section>
-              <Button variant="destructive" className="delete-page" onClick={removeActivePage} disabled={pages.length === 1}>
-                <Trash2 data-icon="inline-start" /> Delete this page
-              </Button>
-            </TabsContent>
-          </Tabs>
-        </aside>
-      </div>
+        <div className="zoom-stack floating-chrome" aria-label="Zoom controls">
+          <ToolButton label="Zoom in" onClick={() => setZoom((value) => Math.min(120, value + 8))}><Plus /></ToolButton>
+          <ToolButton label="Zoom out" onClick={() => setZoom((value) => Math.max(45, value - 8))}><Minus /></ToolButton>
+          <ToolButton label="Reset zoom" onClick={() => setZoom(100)}><Square /></ToolButton>
+        </div>
+
+        {!inspectorOpen && <button className="open-inspector floating-chrome" onClick={() => setInspectorOpen(true)}>Edit page</button>}
+
+        {inspectorOpen && (
+          <aside className="inspector floating-panel" aria-label="Page inspector">
+            <header><div><strong>{active.title || 'Untitled page'}</strong><span>Page {activeIndex + 1}</span></div><button onClick={() => setInspectorOpen(false)} aria-label="Close inspector"><X /></button></header>
+            <Tabs value={inspectorTab} onValueChange={(value) => setInspectorTab(value as InspectorTab)} className="inspector-tabs-root">
+              <TabsList variant="line" className="inspector-tabs">
+                <TabsTrigger value="details">Details</TabsTrigger><TabsTrigger value="style">Style</TabsTrigger><TabsTrigger value="page">Page</TabsTrigger>
+              </TabsList>
+              <form className="inspector-form" onSubmit={(event) => event.preventDefault()}>
+                <TabsContent value="details" className="inspector-content">
+                  <Field label="Title"><input value={active.title} maxLength={120} onChange={(event) => updateActive({ title: event.target.value })} /></Field>
+                  <Field label="Body">
+                    <div className="format-row">
+                      <button type="button" onClick={() => wrapSelection('**')} title="Bold selected text"><strong>B</strong></button>
+                      <button type="button" onClick={() => wrapSelection('*')} title="Italic selected text"><Italic /></button>
+                      <span />
+                      <button type="button" className={active.align === 'left' ? 'active' : ''} onClick={() => updateActive({ align: 'left' })} title="Align left"><AlignLeft /></button>
+                      <button type="button" className={active.align === 'center' ? 'active' : ''} onClick={() => updateActive({ align: 'center' })} title="Align center"><AlignCenter /></button>
+                      <button type="button" className={active.align === 'right' ? 'active' : ''} onClick={() => updateActive({ align: 'right' })} title="Align right"><AlignRight /></button>
+                    </div>
+                    <textarea ref={bodyRef} value={active.body} maxLength={12000} onChange={(event) => updateActive({ body: event.target.value })} rows={10} />
+                    <small>{active.body.length} characters</small>
+                  </Field>
+                  <Field label="Illustration">
+                    {active.image ? (
+                      <div className="image-control"><Image unoptimized width={258} height={110} src={active.image} alt="Current manuscript illustration" /><button type="button" onClick={() => updateActive({ image: undefined })}><Trash2 /> Remove</button></div>
+                    ) : (
+                      <button type="button" className="upload-button" onClick={() => imageInputRef.current?.click()}><ImagePlus /> Add an image</button>
+                    )}
+                  </Field>
+                </TabsContent>
+                <TabsContent value="style" className="inspector-content">
+                  <Field label="Manuscript style">
+                    <Select value={manuscript.theme} onValueChange={(value) => commit((current) => ({ ...current, theme: value as ThemeId }))}>
+                      <SelectTrigger className="theme-select"><SelectValue /></SelectTrigger>
+                      <SelectContent>{Object.entries(themes).map(([id, item]) => <SelectItem key={id} value={id}>{item.name}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </Field>
+                  <div className="theme-cards">
+                    {(Object.entries(themes) as [ThemeId, (typeof themes)[ThemeId]][]).map(([id, item]) => (
+                      <button type="button" aria-label={`Use ${item.name} style`} key={id} className={manuscript.theme === id ? 'selected' : ''} onClick={() => commit((current) => ({ ...current, theme: id }))}>
+                        <span className={`theme-swatch theme-${id}`} /><span><strong>{item.name}</strong><small>{item.family}</small></span>
+                      </button>
+                    ))}
+                  </div>
+                </TabsContent>
+                <TabsContent value="page" className="inspector-content">
+                  <Field label="Manuscript name"><input value={manuscript.name} maxLength={80} onChange={(event) => commit((current) => ({ ...current, name: event.target.value }))} /></Field>
+                  <Field label="Format"><div className="property-row"><span>Page size</span><strong>A4 portrait</strong></div><div className="property-row"><span>Numbering</span><strong>Visible</strong></div></Field>
+                </TabsContent>
+                <footer><button type="button" className="saved-button" disabled><Check /> {saved ? 'Saved' : 'Saving…'}</button><button type="button" className="trash-button" disabled={manuscript.pages.length === 1} onClick={deletePage} aria-label="Delete page"><Trash2 /></button></footer>
+              </form>
+            </Tabs>
+          </aside>
+        )}
+
+        <input ref={imageInputRef} hidden type="file" accept="image/*" onChange={(event) => { chooseImage(event.target.files?.[0]); event.target.value = ''; }} />
+        <input ref={importInputRef} hidden type="file" accept="application/json,.json" onChange={(event) => { void importJson(event.target.files?.[0]); event.target.value = ''; }} />
+      </section>
     </main>
   );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return <label className="field"><span>{label}</span>{children}</label>;
+}
+
+function Divider() { return <span className="tool-divider" aria-hidden="true" />; }
+
+function ToolButton({ label, onClick, active, disabled, children }: { label: string; onClick: () => void; active?: boolean; disabled?: boolean; children: React.ReactNode }) {
+  return <button type="button" className={`tool-button ${active ? 'active' : ''}`} onClick={onClick} disabled={disabled} title={label} aria-label={label}>{children}</button>;
 }
