@@ -11,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AccountControl } from '@/components/account-control';
+import { WorkspaceAccountChip } from '@/components/workspace-account-chip';
 
 type ThemeId = 'royal' | 'arcane' | 'datapad' | 'dossier';
 type TextAlign = 'left' | 'center' | 'right';
@@ -275,7 +275,7 @@ export default function Home() {
         </div>
 
         <div className="top-right-actions">
-          <div className="save-chip floating-chrome"><Check /><span>{saved ? 'Saved locally' : 'Saving…'}</span></div>
+          <WorkspaceAccountChip saved={saved} />
           <button type="button" className="accent-action" disabled={exporting} onClick={() => { void exportPng(); }} aria-label="Export current page as PNG">
             <Download /> {exporting ? 'Exporting…' : 'Export PNG'}
           </button>
@@ -374,7 +374,6 @@ export default function Home() {
                 <TabsContent value="page" className="inspector-content">
                   <Field label="Manuscript name"><input value={manuscript.name} maxLength={80} onChange={(event) => commit((current) => ({ ...current, name: event.target.value }))} /></Field>
                   <Field label="Format"><div className="property-row"><span>Page size</span><strong>A4 portrait</strong></div><div className="property-row"><span>Numbering</span><strong>Visible</strong></div></Field>
-                  <Field label="Account"><AccountControl /></Field>
                 </TabsContent>
                 <footer><button type="button" className="saved-button" disabled><Check /> {saved ? 'Saved' : 'Saving…'}</button><button type="button" className="trash-button" disabled={manuscript.pages.length === 1} onClick={deletePage} aria-label="Delete page"><Trash2 /></button></footer>
               </form>

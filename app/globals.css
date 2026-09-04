@@ -3,6 +3,12 @@
 @import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
+@theme {
+  --color-zinc-50: #f2f5fb; --color-zinc-100: #e6eaf5; --color-zinc-200: #d2daec;
+  --color-zinc-300: #b3bfda; --color-zinc-400: #93a2c4; --color-zinc-500: #828fb2;
+  --color-zinc-600: #4c5876; --color-zinc-700: #333e58; --color-zinc-800: #1c2438;
+  --color-zinc-900: #121829; --color-zinc-950: #0b0e1a;
+}
 @theme inline {
   --color-background: var(--background); --color-foreground: var(--foreground);
   --color-card: var(--card); --color-card-foreground: var(--card-foreground);
@@ -11,7 +17,7 @@
   --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive); --color-border: var(--border);
+  --color-destructive: var(--destructive); --color-destructive-fill: var(--destructive-fill); --color-border: var(--border);
   --color-input: var(--input); --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans); --font-mono: var(--font-geist-mono);
   --radius-sm: calc(var(--radius) * .6); --radius-md: calc(var(--radius) * .8);
@@ -26,7 +32,7 @@
   --secondary: #1c2438; --secondary-foreground: #d2daec;
   --muted: #1c2438; --muted-foreground: #93a2c4;
   --accent: #ef9f27; --accent-foreground: #16100a;
-  --destructive: #f87171; --border: #333e58; --input: #333e58; --ring: #ef9f27;
+  --destructive: #f87171; --destructive-fill: #c8353c; --border: #333e58; --input: #333e58; --ring: #ef9f27;
   --radius: .625rem; --surface-1: #121829; --surface-2: #1c2438;
   --border-strong: #4c5876; --text-secondary: #93a2c4; --text-muted: #828fb2;
   --canvas-dot: #1a2138;
@@ -34,9 +40,9 @@
 
 * { box-sizing: border-box; }
 html, body { width: 100%; height: 100%; }
-body { margin: 0; overflow: hidden; background: var(--background); color: var(--foreground); font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }
+body { margin: 0; background: var(--background); color: var(--foreground); font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }
 button, input, textarea { font: inherit; } button { cursor: pointer; }
-.app-shell, .canvas-area { width: 100%; height: 100vh; }
+.app-shell, .canvas-area { width: 100%; height: 100vh; overflow: hidden; }
 .canvas-area { position: relative; overflow: hidden; background-color: var(--background); background-image: radial-gradient(var(--canvas-dot) 1.2px,transparent 1.2px); background-size: 20px 20px; }
 .canvas-area::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse 115% 75% at 50% 45%,transparent 40%,rgba(0,0,0,.28) 78%,rgba(0,0,0,.48) 100%); }
 
@@ -59,8 +65,14 @@ button, input, textarea { font: inherit; } button { cursor: pointer; }
 .identity-stats { flex: none; color: #4c5876; font: 10px var(--font-geist-mono); }
 
 .top-right-actions { position: absolute; right: 16px; top: 16px; z-index: 20; display: flex; align-items: center; gap: 8px; }
-.save-chip { display: flex; height: 34px; align-items: center; gap: 7px; padding: 0 10px; color: #828fb2; font-size: 12px; }
-.save-chip svg { width: 13px; height: 13px; color: #5dcaa5; }
+.account-chip { display: flex; height: 34px; align-items: center; gap: 8px; padding: 0 10px; color: #828fb2; font-size: 12px; }
+.account-chip svg { width: 14px; height: 14px; }
+.account-chip a { color: #d2daec; text-decoration: underline; text-underline-offset: 2px; transition: color .14s; }
+.account-chip a:hover { color: white; }
+.guest-dot { width: 6px; height: 6px; flex: none; border-radius: 999px; background: #d85a30; }
+.account-success { color: #5dcaa5; }
+.account-spinner { color: #93a2c4; animation: account-spin .8s linear infinite; }
+@keyframes account-spin { to { transform: rotate(360deg); } }
 .accent-action { display: flex; height: 34px; align-items: center; gap: 7px; padding: 0 13px; border: 0; border-radius: 8px; color: #17120a; background: var(--accent); font-size: 12px; font-weight: 650; box-shadow: 0 7px 18px #0004; }
 .accent-action:hover { background: #f5ac3e; }
 .accent-action:disabled { cursor: wait; opacity: .65; }
@@ -167,11 +179,6 @@ button, input, textarea { font: inherit; } button { cursor: pointer; }
 .theme-cards small { margin-top: 2px; color: #828fb2; font-size: 10px; }
 .property-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--surface-2); color: #828fb2; font-size: 12px; }
 .property-row strong { color: #d2daec; font-weight: 500; }
-.account-box { display: flex; min-width: 0; flex-direction: column; gap: 8px; padding: 11px; border: 1px solid var(--border); border-radius: 6px; background: var(--background); color: #828fb2; font-size: 11px; line-height: 1.45; }
-.account-email { overflow: hidden; color: #d2daec; text-overflow: ellipsis; white-space: nowrap; }
-.account-box a, .account-box button { width: fit-content; border: 0; padding: 0; color: var(--accent); background: transparent; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
-.account-box a:hover, .account-box button:hover { color: #f5ac3e; }
-.account-row.muted { color: #596684; font-size: 11px; }
 .saved-button { display: flex; height: 38px; flex: 1; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 6px; color: #121829; background: #e6eaf5; font-size: 13px; font-weight: 550; }
 .saved-button svg { width: 13px; height: 13px; }
 .saved-button:disabled { opacity: .55; }
@@ -182,8 +189,7 @@ button, input, textarea { font: inherit; } button { cursor: pointer; }
 
 @media (max-width: 820px) {
   .identity-chip { max-width: calc(100vw - 380px); }
-  .identity-stats, .save-chip span, .settings-button { display: none; }
-  .save-chip { width: 34px; justify-content: center; padding: 0; }
+  .identity-stats, .account-chip > span:not(.guest-dot), .settings-button { display: none; }
   .page-stage.inspector-visible { padding-right: 24px; }
   .page-stage.pages-visible { padding-left: 24px; }
   .inspector, .pages-panel { top: 66px; bottom: 10px; }
@@ -194,7 +200,7 @@ button, input, textarea { font: inherit; } button { cursor: pointer; }
   .identity-chip { top: 10px; max-width: 42vw; height: 36px; }
   .identity-stats, .manuscript-mark { display: none; }
   .top-right-actions { top: 10px; right: 10px; }
-  .save-chip { display: none; } .accent-action { height: 32px; padding: 0 10px; }
+  .account-chip { display: none; } .accent-action { height: 32px; padding: 0 10px; }
   .inspector, .pages-panel { left: 10px; right: 10px; bottom: 10px; width: auto; }
   .manuscript-page { transform-origin: center !important; }
 }
@@ -207,16 +213,3 @@ button, input, textarea { font: inherit; } button { cursor: pointer; }
   .manuscript-page { width: 210mm; height: 297mm; margin: 0; transform: none !important; box-shadow: none; print-color-adjust: exact; }
 }
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
-
-.auth-page { display: grid; min-height: 100vh; place-items: center; overflow: auto; padding: 24px; background-color: var(--background); background-image: radial-gradient(var(--canvas-dot) 1.2px,transparent 1.2px); background-size: 20px 20px; }
-.auth-card { width: min(100%, 370px); padding: 28px; }
-.auth-eyebrow { color: var(--accent); font: 700 10px var(--font-geist-mono); letter-spacing: .16em; }
-.auth-card h1 { margin: 9px 0 6px; color: #e6eaf5; font-size: 24px; letter-spacing: -.025em; }
-.auth-card > p { margin: 0 0 22px; color: #93a2c4; font-size: 13px; line-height: 1.55; }
-.google-button { display: flex; width: 100%; height: 42px; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: 7px; color: #17120a; background: #e6eaf5; font-size: 13px; font-weight: 650; }
-.google-button:hover:not(:disabled) { background: white; }
-.google-button:disabled { cursor: wait; opacity: .6; }
-.google-button svg { width: 17px; height: 17px; }
-.auth-card .auth-error { margin: 12px 0 0; color: #f87171; font-size: 11px; }
-.guest-link { display: block; margin-top: 16px; color: #828fb2; font-size: 11px; text-align: center; text-decoration: underline; text-underline-offset: 3px; }
-.guest-link:hover { color: #d2daec; }
