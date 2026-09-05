@@ -1,0 +1,24 @@
+BEGIN;
+-- Rename in place: preserve rows, IDs, references, grants and RLS.
+ALTER TABLE public."dynasties" RENAME TO "dynasty_trees";
+ALTER TABLE public."dynasty_trees" RENAME CONSTRAINT "dynasties_pkey" TO "dynasty_trees_pkey";
+ALTER TABLE public."dynasty_trees" RENAME CONSTRAINT "dynasties_ownerId_fkey" TO "dynasty_trees_ownerId_fkey";
+ALTER INDEX public."dynasties_slug_key" RENAME TO "dynasty_trees_slug_key";
+ALTER INDEX public."dynasties_ownerId_idx" RENAME TO "dynasty_trees_ownerId_idx";
+ALTER TABLE public."characters" RENAME TO "dynasty_characters";
+ALTER TABLE public."dynasty_characters" RENAME CONSTRAINT "characters_pkey" TO "dynasty_characters_pkey";
+ALTER TABLE public."dynasty_characters" RENAME CONSTRAINT "characters_dynastyId_fkey" TO "dynasty_characters_dynastyId_fkey";
+ALTER INDEX public."characters_dynastyId_idx" RENAME TO "dynasty_characters_dynastyId_idx";
+ALTER TABLE public."relationships" RENAME TO "dynasty_relationships";
+ALTER TABLE public."dynasty_relationships" RENAME CONSTRAINT "relationships_pkey" TO "dynasty_relationships_pkey";
+ALTER TABLE public."dynasty_relationships" RENAME CONSTRAINT "relationships_dynastyId_fkey" TO "dynasty_relationships_dynastyId_fkey";
+ALTER TABLE public."dynasty_relationships" RENAME CONSTRAINT "relationships_fromId_fkey" TO "dynasty_relationships_fromId_fkey";
+ALTER TABLE public."dynasty_relationships" RENAME CONSTRAINT "relationships_toId_fkey" TO "dynasty_relationships_toId_fkey";
+ALTER INDEX public."relationships_dynastyId_idx" RENAME TO "dynasty_relationships_dynastyId_idx";
+ALTER INDEX public."relationships_fromId_idx" RENAME TO "dynasty_relationships_fromId_idx";
+ALTER INDEX public."relationships_toId_idx" RENAME TO "dynasty_relationships_toId_idx";
+ALTER TABLE public."reports" RENAME TO "dynasty_reports";
+ALTER TABLE public."dynasty_reports" RENAME CONSTRAINT "reports_pkey" TO "dynasty_reports_pkey";
+ALTER INDEX public."reports_source_idx" RENAME TO "dynasty_reports_source_idx";
+ALTER INDEX public."reports_status_idx" RENAME TO "dynasty_reports_status_idx";
+COMMIT;

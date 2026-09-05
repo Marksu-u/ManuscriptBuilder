@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["public", "manuscript"]
+  schemas  = ["public"]
 }
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ model Dynasty {
   relationships Relationship[]
 
   @@index([ownerId])
-  @@map("dynasties")
+  @@map("dynasty_trees")
   @@schema("public")
 }
 
@@ -119,7 +119,7 @@ model Character {
   relationsTo   Relationship[] @relation("RelationshipTo")
 
   @@index([dynastyId])
-  @@map("characters")
+  @@map("dynasty_characters")
   @@schema("public")
 }
 
@@ -144,7 +144,7 @@ model Relationship {
   @@index([dynastyId])
   @@index([fromId])
   @@index([toId])
-  @@map("relationships")
+  @@map("dynasty_relationships")
   @@schema("public")
 }
 
@@ -159,20 +159,8 @@ model Report {
 
   @@index([source])
   @@index([status])
-  @@map("reports")
+  @@map("dynasty_reports")
   @@schema("public")
-}
-
-// Retained for compatibility with deployed clients during the shared-account rollout.
-model LegacyManuscriptUser {
-  id         String   @id @default(cuid())
-  supabaseId String   @unique
-  email      String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@map("users")
-  @@schema("manuscript")
 }
 
 model Manuscript {
@@ -190,7 +178,7 @@ model Manuscript {
 
   @@index([ownerId])
   @@map("manuscripts")
-  @@schema("manuscript")
+  @@schema("public")
 }
 
 model ManuscriptPage {
@@ -205,8 +193,8 @@ model ManuscriptPage {
 
   @@unique([manuscriptId, position])
   @@index([manuscriptId])
-  @@map("pages")
-  @@schema("manuscript")
+  @@map("manuscript_pages")
+  @@schema("public")
 }
 
 model ManuscriptAsset {
@@ -227,6 +215,6 @@ model ManuscriptAsset {
 
   @@index([ownerId])
   @@index([manuscriptId])
-  @@map("assets")
-  @@schema("manuscript")
+  @@map("manuscript_assets")
+  @@schema("public")
 }

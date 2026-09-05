@@ -46,7 +46,7 @@ PostgreSQL · Supabase Auth · Vercel.
 The editor lives in
 [`components/manuscript-workspace.tsx`](components/manuscript-workspace.tsx).
 Guest drafts use browser storage; account manuscripts and their pages are
-stored in a dedicated PostgreSQL schema.
+stored alongside the other apps in the shared PostgreSQL `public` schema.
 
 Manuscript Builder is part of **Bag Of Holding Tools**, a family of free TTRPG
 utilities with a shared visual language and optional account system.
