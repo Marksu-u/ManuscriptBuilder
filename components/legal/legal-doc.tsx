@@ -3,12 +3,14 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Footer } from "@/components/legal/legal-footer";
 import { LanguageSwitcher } from "./language-switcher";
+import { FramedHeader } from "@/components/shell/framed-header";
 
 export async function LegalDoc({ title, updated, children }: { title: string; updated: string; children: ReactNode }) {
   const t = await getTranslations("legalPages");
   return (
     <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-2xl px-4 py-16 text-sm text-zinc-300">
+      <FramedHeader maxWidth="max-w-2xl" />
+      <div className="mx-auto max-w-2xl px-6 py-16 text-sm text-zinc-300">
         <div className="mb-6 flex items-center justify-between gap-4"><LanguageSwitcher /></div>
         <h1 className="mb-2 text-2xl font-bold text-zinc-100">{title}</h1>
         <p className="mb-8 text-zinc-500">{t("updated", { date: updated })}</p>

@@ -7,7 +7,7 @@ import { getPathname } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { getAuthUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { blankManuscript, manuscriptSchema, type ThemeId } from '@/lib/manuscript-data';
+import { blankManuscript, exportManuscript, manuscriptSchema, type Manuscript, type ThemeId } from '@/lib/manuscript-data';
 import { writeOwnedManuscript } from '@/lib/manuscript-repository';
 
 export async function createManuscript(_state: { error: string } | null, form: FormData) {
@@ -47,6 +47,26 @@ export async function importBrowserManuscript(input: unknown): Promise<{error:st
     revalidatePath(getPathname({href:'/dashboard',locale}));
     return { id: created.id };
   } catch { return { error: t('importFailed') }; }
+}
+
+export async function exportEverything() {
+  const user = await getAuthUser();
+  const records = await prisma.manuscript.findMany({
+    where: { ownerId: user.id },
+    orderBy: { updatedAt: 'desc' },
+    include: { pages: { orderBy: { position: 'asc' } } },
+  });
+  return {
+    version: 1 as const,
+    product: 'manuscript-builder' as const,
+    exportedAt: new Date().toISOString(),
+    manuscripts: records.map((record) => exportManuscript(manuscriptSchema.parse({
+      name: record.title,
+      theme: record.styleId,
+      activeId: (record.pages[0]?.content as Manuscript['pages'][number] | undefined)?.id,
+      pages: record.pages.map((page) => page.content),
+    }))),
+  };
 }
 
 export async function saveManuscript(id: string, expectedVersion: string, input: unknown): Promise<{error:string}|{version:string}> {

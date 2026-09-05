@@ -34,7 +34,7 @@ export function WorkspaceAccountChip({ saved, cloud = false, error = false }: { 
     };
   }, [supabase, cloud]);
 
-  if (cloud) return <div className="account-chip floating-chrome" role="status">{error ? <CloudOff /> : saved ? <Check className="account-success" /> : <Loader2 className="account-spinner" />}<span>{error ? t('notSaved') : saved ? t('cloudSaved') : t('saving')}</span><Link href="/account">{t('account')}</Link></div>;
+  if (cloud) return <div className={`account-chip floating-chrome ${error ? 'account-error' : ''}`} role={error ? "alert" : "status"}>{error ? <CloudOff /> : saved ? <Check className="account-success" /> : <Loader2 className="account-spinner" />}<span>{error ? t('notSaved') : saved ? t('cloudSaved') : t('saving')}</span><Link href="/account">{t('account')}</Link></div>;
 
   if (!ready) {
     return (
@@ -46,7 +46,7 @@ export function WorkspaceAccountChip({ saved, cloud = false, error = false }: { 
 
   if (!user) {
     return (
-      <div className="account-chip floating-chrome">
+      <div className={`account-chip floating-chrome ${error ? 'account-error' : ''}`} role={error ? "alert" : "status"}>
         <span className="guest-dot" aria-hidden="true" />
         <span>{error ? t('notSaved') : saved ? t('guestSaved') : t('savingLocal')}</span>
         <Link href="/login">{t('signIn')}</Link>
@@ -55,7 +55,7 @@ export function WorkspaceAccountChip({ saved, cloud = false, error = false }: { 
   }
 
   return (
-    <div className="account-chip floating-chrome">
+    <div className={`account-chip floating-chrome ${error ? 'account-error' : ''}`} role={error ? "alert" : "status"}>
       {error ? <CloudOff /> : saved ? <Check className="account-success" /> : <Loader2 className="account-spinner" />}
       <span>{error ? t('notSaved') : saved ? t('localSaved') : t('saving')}</span>
       <Link href="/dashboard">{t('library')}</Link>

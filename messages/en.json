@@ -313,6 +313,12 @@
     "heading": "Account",
     "email": "Email",
     "saved": "Saved manuscripts",
+    "exportAll": "Export everything",
+    "export": {
+      "download": "Download JSON",
+      "preparing": "Preparing…",
+      "error": "Export failed — please try again."
+    },
     "danger": {
       "heading": "Danger zone",
       "body": "Deleting your account permanently erases your shared sign-in and everything tied to it. This cannot be undone.",
@@ -365,7 +371,7 @@
     },
     "guestImport": {
       "heading": "Bring your browser draft with you",
-      "body": "Import “{name}” into your account to open it on other devices. Your browser copy will be kept.",
+      "body": "Import “{name}” into your account to open it on other devices. The browser copy is removed after a successful transfer.",
       "import": "Import browser draft",
       "importing": "Importing…",
       "dismiss": "Not now",
@@ -477,6 +483,8 @@
     "editMetaTitle": "Edit manuscript",
     "srHeading": "Manuscript Builder — free TTRPG handout creator",
     "srBody": "Create illustrated letters, royal decrees, grimoires, dossiers and sci-fi datapads for tabletop roleplaying games. Edit multiple pages, save locally, and export PNG images or editable JSON backups. No account required.",
+    "dismiss": "Dismiss",
+    "loading": "Loading your manuscript…",
     "aria": {
       "workspace": "Manuscript workspace",
       "pages": "Manuscript pages",
@@ -511,7 +519,12 @@
       "remove": "Remove"
     },
     "json": {
-      "invalid": "This JSON file is not a valid manuscript."
+      "invalid": "This JSON file is not a valid manuscript.",
+      "tooLarge": "This JSON file is too large. Choose a file under 3 MB.",
+      "replaceTitle": "Replace this manuscript?",
+      "replaceBody": "Importing will replace the pages and style currently open. This cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Replace manuscript"
     },
     "toolbar": {
       "aria": "Manuscript tools",
@@ -566,6 +579,7 @@
       "alignCenter": "Align center",
       "alignRight": "Align right",
       "characters": "{count} characters",
+      "overflow": "Some content falls outside the printable page. Shorten the text or remove the image.",
       "style": "Manuscript style",
       "useStyle": "Use {style} style",
       "about": "About Manuscript Builder",

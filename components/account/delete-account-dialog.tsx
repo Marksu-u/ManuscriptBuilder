@@ -50,7 +50,7 @@ export function DeleteAccountDialog({ email }: { email: string }) {
       <DialogTrigger render={<button className="rounded-md border border-destructive/50 px-4 py-2 text-sm font-medium text-destructive transition-colors hover:border-destructive" />}>
         {t("trigger")}
       </DialogTrigger>
-      <DialogContent className="max-w-md border border-destructive/40 bg-background p-6" showCloseButton>
+      <DialogContent className="max-w-[calc(100%-2rem)] border-destructive/40 bg-background sm:max-w-sm" showCloseButton={false}>
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-destructive" />
           <DialogTitle className="text-base font-semibold text-zinc-100">{t("title")}</DialogTitle>

@@ -313,6 +313,12 @@
     "heading": "Compte",
     "email": "Adresse email",
     "saved": "Manuscrits enregistrés",
+    "exportAll": "Tout exporter",
+    "export": {
+      "download": "Télécharger le JSON",
+      "preparing": "Préparation…",
+      "error": "L’export a échoué — veuillez réessayer."
+    },
     "danger": {
       "heading": "Zone sensible",
       "body": "La suppression de votre compte efface définitivement votre connexion partagée et tout ce qui y est rattaché. Cette action est irréversible.",
@@ -365,7 +371,7 @@
     },
     "guestImport": {
       "heading": "Emportez votre brouillon local",
-      "body": "Importez « {name} » dans votre compte pour l'ouvrir sur d'autres appareils. La copie de votre navigateur sera conservée.",
+      "body": "Importez « {name} » dans votre compte pour l'ouvrir sur d'autres appareils. La copie locale sera supprimée après un transfert réussi.",
       "import": "Importer le brouillon local",
       "importing": "Importation…",
       "dismiss": "Plus tard",
@@ -477,6 +483,8 @@
     "editMetaTitle": "Modifier le manuscrit",
     "srHeading": "Manuscript Builder — créateur gratuit d'aides de jeu pour JdR",
     "srBody": "Créez des lettres illustrées, décrets royaux, grimoires, dossiers et datapads de science-fiction pour vos jeux de rôle sur table. Modifiez plusieurs pages, enregistrez-les localement et exportez-les en PNG ou JSON. Aucun compte requis.",
+    "dismiss": "Fermer",
+    "loading": "Chargement de votre manuscrit…",
     "aria": {
       "workspace": "Espace de travail du manuscrit",
       "pages": "Pages du manuscrit",
@@ -511,7 +519,12 @@
       "remove": "Supprimer"
     },
     "json": {
-      "invalid": "Ce fichier JSON n'est pas un manuscrit valide."
+      "invalid": "Ce fichier JSON n'est pas un manuscrit valide.",
+      "tooLarge": "Ce fichier JSON est trop volumineux. Choisissez un fichier de moins de 3 Mo.",
+      "replaceTitle": "Remplacer ce manuscrit ?",
+      "replaceBody": "L’importation remplacera les pages et le style actuellement ouverts. Cette action est irréversible.",
+      "cancel": "Annuler",
+      "confirm": "Remplacer le manuscrit"
     },
     "toolbar": {
       "aria": "Outils du manuscrit",
@@ -566,6 +579,7 @@
       "alignCenter": "Centrer",
       "alignRight": "Aligner à droite",
       "characters": "{count} caractères",
+      "overflow": "Une partie du contenu dépasse de la page imprimable. Raccourcissez le texte ou retirez l’image.",
       "style": "Style du manuscrit",
       "useStyle": "Utiliser le style {style}",
       "about": "À propos de Manuscript Builder",

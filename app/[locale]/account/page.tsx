@@ -3,6 +3,7 @@ import { Trash2 } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { signOut } from "@/app/actions/auth";
 import { DeleteAccountDialog } from "@/components/account/delete-account-dialog";
+import { ExportEverythingButton } from "@/components/account/export-everything-button";
 import { ECOSYSTEM_TOOLS } from "@/components/legal/ecosystem";
 import { FramedHeader } from "@/components/shell/framed-header";
 import { getAuthUser } from "@/lib/auth";
@@ -23,13 +24,14 @@ export default async function AccountPage({ params }: { params: Promise<{ locale
 
   return <div className="min-h-screen bg-background text-zinc-100">
     <FramedHeader toolName={t("back")} href="/dashboard" maxWidth="max-w-xl">
-      <form action={signOut}><button type="submit" className="cursor-pointer text-xs text-zinc-500 transition-colors hover:text-zinc-300">{t("signOut")}</button></form>
+      <form action={signOut}><input type="hidden" name="locale" value={locale}/><button type="submit" className="cursor-pointer text-xs text-zinc-500 transition-colors hover:text-zinc-300">{t("signOut")}</button></form>
     </FramedHeader>
     <main className="mx-auto max-w-xl px-6 py-10">
       <h1 className="text-2xl font-medium tracking-tight">{t("heading")}</h1>
       <section className="mt-6 divide-y divide-zinc-800 rounded-xl border border-zinc-700 bg-surface-1 px-4">
         <div className="flex items-center justify-between gap-4 py-3.5 text-sm"><span className="text-zinc-400">{t("email")}</span><span className="truncate text-zinc-100">{user.email}</span></div>
         <div className="flex items-center justify-between gap-4 py-3.5 text-sm"><span className="text-zinc-400">{t("saved")}</span><span className="font-mono tabular-nums text-zinc-100">{manuscriptCount}</span></div>
+        <div className="flex items-center justify-between gap-4 py-3.5 text-sm"><span className="text-zinc-400">{t("exportAll")}</span><ExportEverythingButton /></div>
       </section>
       <section className="mt-6 rounded-xl border border-zinc-800 border-l-2 border-l-destructive bg-surface-2 p-5">
         <h2 className="text-sm font-semibold text-destructive">{t("danger.heading")}</h2>

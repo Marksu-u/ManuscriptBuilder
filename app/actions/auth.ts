@@ -27,10 +27,10 @@ export async function signInWithGoogle() {
   return { url: data.url };
 }
 
-export async function signOut() {
+export async function signOut(formData: FormData) {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/");
+  redirect(formData.get("locale") === "fr" ? "/fr/login" : "/login");
 }
 
 export async function deleteAccount(): Promise<{ success: true } | { error: string }> {

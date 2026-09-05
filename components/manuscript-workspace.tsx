@@ -1,24 +1,35 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { saveManuscript } from '@/app/actions/manuscripts';
 import { toPng } from 'html-to-image';
 import {
-  AlignCenter, AlignLeft, AlignRight, Check, FilePlus2,
+  AlignCenter, AlignLeft, AlignRight, Check, ChevronLeft, FilePlus2,
   ImagePlus, Italic, Minus, Plus, Settings, Sparkles, Square, Trash2, X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { WorkspaceAccountChip } from '@/components/workspace-account-chip';
 import { WorkspaceToolbar } from '@/components/workspace-toolbar';
 import { LegalLinks } from '@/components/legal/legal-footer';
 import { triggerJsonDownload } from '@/lib/export';
 
-import { STORAGE_KEY, themes, validManuscript, type ThemeId, type Page, type Manuscript } from '@/lib/manuscript-data';
+import {
+  MAX_MANUSCRIPT_JSON_BYTES,
+  STORAGE_KEY,
+  exportManuscript,
+  parseManuscriptExport,
+  themes,
+  validManuscript,
+  type ThemeId,
+  type Page,
+  type Manuscript,
+} from '@/lib/manuscript-data';
 type InspectorTab = 'details' | 'style' | 'page';
 
 type WebMcpTool = {
@@ -59,6 +70,8 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
   const [hydrated, setHydrated] = useState(Boolean(documentId));
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [operationError, setOperationError] = useState<string | null>(null);
+  const [pendingImport, setPendingImport] = useState<File | null>(null);
   const version = useRef(initialVersion);
   const latestDraft = useRef(manuscript);
   useEffect(() => { latestDraft.current = manuscript; }, [manuscript]);
@@ -69,18 +82,70 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [pageOverflow, setPageOverflow] = useState(false);
   const undoStack = useRef<Manuscript[]>([]);
   const redoStack = useRef<Manuscript[]>([]);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const renderedBodyRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
+  const pagesPanelRef = useRef<HTMLElement>(null);
+  const inspectorPanelRef = useRef<HTMLElement>(null);
 
   const active = useMemo(
     () => manuscript.pages.find((page) => page.id === manuscript.activeId) ?? manuscript.pages[0],
     [manuscript],
   );
   const activeIndex = manuscript.pages.findIndex((page) => page.id === active.id);
+
+  useEffect(() => {
+    const renderedBody = renderedBodyRef.current;
+    if (!renderedBody) return;
+    const update = () => setPageOverflow(renderedBody.offsetTop + renderedBody.scrollHeight > 650);
+    const observer = new ResizeObserver(update);
+    observer.observe(renderedBody);
+    if (pageRef.current) observer.observe(pageRef.current);
+    return () => observer.disconnect();
+  }, [active.body, active.id, active.image, active.title, manuscript.theme]);
+
+  const isCompactWorkspace = () => window.matchMedia('(max-width: 640px)').matches;
+
+  function togglePages() {
+    setPagesOpen((current) => {
+      const next = !current;
+      if (next && isCompactWorkspace()) setInspectorOpen(false);
+      if (next) window.requestAnimationFrame(() => pagesPanelRef.current?.focus());
+      return next;
+    });
+  }
+
+  function openInspector(tab?: InspectorTab) {
+    if (isCompactWorkspace()) setPagesOpen(false);
+    if (tab) setInspectorTab(tab);
+    setInspectorOpen(true);
+    window.requestAnimationFrame(() => inspectorPanelRef.current?.focus());
+  }
+
+  const fitPage = useCallback(() => {
+    const compactPanels = window.innerWidth <= 820;
+    const reservedWidth = compactPanels ? 0 : (inspectorOpen ? 300 : 0) + (pagesOpen ? 222 : 0);
+    const horizontalSpace = Math.max(252, window.innerWidth - 48 - reservedWidth);
+    const topSpace = window.innerWidth <= 1100 ? 124 : 86;
+    const verticalSpace = Math.max(356, window.innerHeight - topSpace - 16);
+    const next = Math.floor(Math.min(horizontalSpace / 560, verticalSpace / 792) * 100);
+    setZoom(Math.max(45, Math.min(120, next)));
+  }, [inspectorOpen, pagesOpen]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const frame = window.requestAnimationFrame(fitPage);
+    window.addEventListener('resize', fitPage);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('resize', fitPage);
+    };
+  }, [fitPage, hydrated]);
 
   useEffect(() => {
     if (documentId) return;
@@ -179,7 +244,8 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
   function addPage() {
     const id = crypto.randomUUID();
     commit((current) => ({ ...current, activeId: id, pages: [...current.pages, { id, title: t('initial.untitled'), body: t('initial.begin'), align: 'left' }] }));
-    setPagesOpen(true); setInspectorOpen(true); setInspectorTab('details');
+    if (!isCompactWorkspace()) setPagesOpen(true);
+    openInspector('details');
   }
 
   function deletePage() {
@@ -204,11 +270,12 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
   function chooseImage(file?: File) {
     if (!file) return;
     if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type) || file.size > 700_000) {
-      window.alert(t('image.invalid'));
+      setOperationError(t('image.invalid'));
       return;
     }
     const reader = new FileReader();
     reader.onload = () => { if (typeof reader.result === 'string') updateActive({ image: reader.result }); };
+    reader.onerror = () => setOperationError(t('image.invalid'));
     reader.readAsDataURL(file);
   }
 
@@ -232,7 +299,7 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
       link.click();
     } catch (error) {
       console.error('PNG export failed:', error);
-      window.alert(t('image.exportFailed'));
+      setOperationError(t('image.exportFailed'));
     } finally {
       setExporting(false);
     }
@@ -240,19 +307,26 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
 
   function downloadJson() {
     const baseName = manuscript.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    triggerJsonDownload(manuscript, `${baseName || 'manuscript'}.json`);
+    triggerJsonDownload(exportManuscript(manuscript), `${baseName || 'manuscript'}.json`);
   }
 
-  async function importJson(file?: File) {
-    if (!file) return;
+  async function runImportJson(file: File) {
+    setPendingImport(null);
+    setOperationError(null);
+    if (file.size > MAX_MANUSCRIPT_JSON_BYTES) {
+      setOperationError(t('json.tooLarge'));
+      return;
+    }
     try {
       const parsed: unknown = JSON.parse(await file.text());
-      if (!validManuscript(parsed)) throw new Error('Invalid manuscript file');
-      commit(() => parsed);
+      const imported = parseManuscriptExport(parsed);
+      if (!imported) throw new Error('Invalid manuscript file');
+      commit(() => imported);
       setPagesOpen(true);
+      if (isCompactWorkspace()) setInspectorOpen(false);
     } catch (error) {
       console.error('JSON import failed:', error);
-      window.alert(t('json.invalid'));
+      setOperationError(t('json.invalid'));
     }
   }
 
@@ -304,11 +378,19 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
     }}>
       <h1 className="sr-only">{t('srHeading')}</h1>
       <p className="sr-only">{t('srBody')}</p>
-      <section className="canvas-area" aria-label={t('aria.workspace')}>
+      <section className={`canvas-area ${!hydrated ? 'workspace-hydrating' : ''}`} aria-label={t('aria.workspace')} aria-busy={!hydrated}>
+        {!hydrated && (
+          <div className="workspace-loading" role="status" aria-label={t('loading')}>
+            <span className="workspace-loading-toolbar" />
+            <span className="workspace-loading-account" />
+            <span className="workspace-loading-identity" />
+            <span className="workspace-loading-page" />
+          </div>
+        )}
         <div className="workspace-header">
           <WorkspaceToolbar
             pagesOpen={pagesOpen}
-            onTogglePages={() => setPagesOpen((open) => !open)}
+            onTogglePages={togglePages}
             canUndo={canUndo}
             canRedo={canRedo}
             onUndo={undo}
@@ -316,7 +398,7 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
             onExportPng={() => { void exportPng(); }}
             onExportJson={downloadJson}
             onImportJson={() => importInputRef.current?.click()}
-            onFitView={() => setZoom(78)}
+            onFitView={fitPage}
             exporting={exporting}
             extra={(
               <button
@@ -324,7 +406,7 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
                 className="workspace-settings flex items-center gap-1.5 rounded px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
                 title={t('toolbar.settings')}
                 aria-label={t('toolbar.settings')}
-                onClick={() => { setInspectorOpen(true); setInspectorTab('style'); }}
+                onClick={() => openInspector('style')}
               >
                 <Settings className="h-3.5 w-3.5" /><span>{t('toolbar.settings')}</span>
               </button>
@@ -332,7 +414,7 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
           />
 
           <div className="identity-chip floating-chrome">
-            <Link href={documentId ? '/dashboard' : '/'} aria-label={documentId ? t('navigation.manuscripts') : t('navigation.home')} title={saved ? t('navigation.back') : t('navigation.waiting')} aria-disabled={!saved} onClick={event => { if (!saved) event.preventDefault(); }} className="text-zinc-400 hover:text-zinc-100">←</Link>
+            {documentId && <><Link href="/dashboard" aria-label={t('navigation.manuscripts')} title={saved ? t('navigation.back') : t('navigation.waiting')} aria-disabled={!saved} onClick={event => { if (!saved) event.preventDefault(); }} className="-ml-1 flex items-center rounded p-1 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"><ChevronLeft size={14}/></Link><span aria-hidden="true" className="h-4 w-px bg-zinc-700"/></>}
             <span className="manuscript-mark" aria-hidden="true"><Sparkles /></span>
             <span className="identity-name" title={manuscript.name}>{manuscript.name}</span>
             <span className="identity-stats">{manuscript.pages.length} · A4</span>
@@ -344,9 +426,10 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
         </div>
 
         {saveError && <div role="alert" className="absolute bottom-4 left-1/2 z-40 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-lg border border-destructive/40 bg-zinc-900 px-4 py-3 text-sm text-zinc-200"><p className="max-w-lg">{saveError}</p><button className="mt-2 underline underline-offset-2" onClick={() => setSaveError(null)}>{t('save.retry')}</button><button className="ml-4 underline underline-offset-2" onClick={downloadJson}>{t('save.download')}</button></div>}
+        {operationError && <div role="alert" className="absolute bottom-4 left-1/2 z-40 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-lg border border-destructive/40 bg-zinc-900 px-4 py-3 text-sm text-zinc-200"><p className="max-w-lg">{operationError}</p><button className="mt-2 underline underline-offset-2" onClick={() => setOperationError(null)}>{t('dismiss')}</button></div>}
 
         {pagesOpen && (
-          <aside className="pages-panel floating-panel" aria-label={t('aria.pages')}>
+          <aside ref={pagesPanelRef} tabIndex={-1} className="pages-panel floating-panel focus:outline-none" aria-label={t('aria.pages')}>
             <header><div><strong>{t('pages.heading')}</strong><span>{t('pages.count',{count:manuscript.pages.length})}</span></div><button onClick={() => setPagesOpen(false)} aria-label={t('pages.close')}><X /></button></header>
             <div className="page-list">
               {manuscript.pages.map((page, index) => (
@@ -372,7 +455,7 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
             <h2>{active.title}</h2>
             <div className="title-rule"><span /></div>
             {active.image && <Image unoptimized width={404} height={210} className="manuscript-image" src={active.image} alt={t('image.uploadedAlt')} />}
-            <div className="manuscript-body" style={{ textAlign: active.align }}>
+            <div ref={renderedBodyRef} className="manuscript-body" style={{ textAlign: active.align }}>
               {active.body.split('\n').map((line, index) => line ? <p key={index}>{inlineMarkup(line)}</p> : <div className="paragraph-gap" key={index} />)}
             </div>
             <div className="seal" aria-label={t('document.seal')}><span>BM</span></div>
@@ -388,10 +471,10 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
           <ToolButton label={t('zoom.reset')} onClick={() => setZoom(100)}><Square /></ToolButton>
         </div>
 
-        {!inspectorOpen && <button className="open-inspector floating-chrome" onClick={() => setInspectorOpen(true)}>{t('inspector.open')}</button>}
+        {!inspectorOpen && <button className="open-inspector floating-chrome" onClick={() => openInspector()}>{t('inspector.open')}</button>}
 
         {inspectorOpen && (
-          <aside className="inspector floating-panel" aria-label={t('aria.inspector')}>
+          <aside ref={inspectorPanelRef} tabIndex={-1} className="inspector floating-panel focus:outline-none" aria-label={t('aria.inspector')}>
             <header><div><strong>{active.title || t('initial.untitled')}</strong><span>{t('inspector.page',{number:activeIndex+1})}</span></div><button onClick={() => setInspectorOpen(false)} aria-label={t('inspector.close')}><X /></button></header>
             <Tabs value={inspectorTab} onValueChange={(value) => setInspectorTab(value as InspectorTab)} className="inspector-tabs-root">
               <TabsList variant="line" className="inspector-tabs">
@@ -399,31 +482,32 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
               </TabsList>
               <form className="inspector-form" onSubmit={(event) => event.preventDefault()}>
                 <TabsContent value="details" className="inspector-content">
-                  <Field label={t('inspector.title')}><input value={active.title} maxLength={120} onChange={(event) => updateActive({ title: event.target.value })} /></Field>
+                  <Field label={t('inspector.title')}><input aria-label={t('inspector.title')} value={active.title} maxLength={120} onChange={(event) => updateActive({ title: event.target.value })} /></Field>
                   <Field label={t('inspector.body')}>
                     <div className="format-row">
-                      <button type="button" onClick={() => wrapSelection('**')} title={t('inspector.bold')}><strong>B</strong></button>
-                      <button type="button" onClick={() => wrapSelection('*')} title={t('inspector.italic')}><Italic /></button>
+                      <button type="button" onClick={() => wrapSelection('**')} title={t('inspector.bold')} aria-label={t('inspector.bold')}><strong>B</strong></button>
+                      <button type="button" onClick={() => wrapSelection('*')} title={t('inspector.italic')} aria-label={t('inspector.italic')}><Italic /></button>
                       <span />
-                      <button type="button" className={active.align === 'left' ? 'active' : ''} onClick={() => updateActive({ align: 'left' })} title={t('inspector.alignLeft')}><AlignLeft /></button>
-                      <button type="button" className={active.align === 'center' ? 'active' : ''} onClick={() => updateActive({ align: 'center' })} title={t('inspector.alignCenter')}><AlignCenter /></button>
-                      <button type="button" className={active.align === 'right' ? 'active' : ''} onClick={() => updateActive({ align: 'right' })} title={t('inspector.alignRight')}><AlignRight /></button>
+                      <button type="button" className={active.align === 'left' ? 'active' : ''} onClick={() => updateActive({ align: 'left' })} title={t('inspector.alignLeft')} aria-label={t('inspector.alignLeft')} aria-pressed={active.align === 'left'}><AlignLeft /></button>
+                      <button type="button" className={active.align === 'center' ? 'active' : ''} onClick={() => updateActive({ align: 'center' })} title={t('inspector.alignCenter')} aria-label={t('inspector.alignCenter')} aria-pressed={active.align === 'center'}><AlignCenter /></button>
+                      <button type="button" className={active.align === 'right' ? 'active' : ''} onClick={() => updateActive({ align: 'right' })} title={t('inspector.alignRight')} aria-label={t('inspector.alignRight')} aria-pressed={active.align === 'right'}><AlignRight /></button>
                     </div>
-                    <textarea ref={bodyRef} value={active.body} maxLength={12000} onChange={(event) => updateActive({ body: event.target.value })} rows={10} />
+                    <textarea ref={bodyRef} aria-label={t('inspector.body')} value={active.body} maxLength={12000} onChange={(event) => updateActive({ body: event.target.value })} rows={10} />
                     <small>{t('inspector.characters',{count:active.body.length})}</small>
+                    {pageOverflow && <small role="alert" className="page-overflow-warning">{t('inspector.overflow')}</small>}
                   </Field>
                   <Field label={t('image.label')}>
                     {active.image ? (
                       <div className="image-control"><Image unoptimized width={258} height={110} src={active.image} alt={t('image.currentAlt')} /><button type="button" onClick={() => updateActive({ image: undefined })}><Trash2 /> {t('image.remove')}</button></div>
                     ) : (
-                      <button type="button" className="upload-button" onClick={() => imageInputRef.current?.click()}><ImagePlus /> {t('image.add')}</button>
+                      <button type="button" className="upload-button" aria-label={t('image.add')} onClick={() => imageInputRef.current?.click()}><ImagePlus /> {t('image.add')}</button>
                     )}
                   </Field>
                 </TabsContent>
                 <TabsContent value="style" className="inspector-content">
                   <Field label={t('inspector.style')}>
                     <Select value={manuscript.theme} onValueChange={(value) => commit((current) => ({ ...current, theme: value as ThemeId }))}>
-                      <SelectTrigger className="theme-select"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="theme-select" aria-label={t('inspector.style')}><SelectValue /></SelectTrigger>
                       <SelectContent>{Object.keys(themes).map((id) => <SelectItem key={id} value={id}>{t(`themes.${id as ThemeId}.name`)}</SelectItem>)}</SelectContent>
                     </Select>
                   </Field>
@@ -440,7 +524,7 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
                   </div>
                 </TabsContent>
                 <TabsContent value="page" className="inspector-content">
-                  <Field label={t('inspector.name')}><input value={manuscript.name} maxLength={80} onChange={(event) => commit((current) => ({ ...current, name: event.target.value }))} /></Field>
+                  <Field label={t('inspector.name')}><input aria-label={t('inspector.name')} value={manuscript.name} maxLength={80} onChange={(event) => commit((current) => ({ ...current, name: event.target.value }))} /></Field>
                   <Field label={t('inspector.format')}><div className="property-row"><span>{t('inspector.pageSize')}</span><strong>{t('inspector.portrait')}</strong></div><div className="property-row"><span>{t('inspector.numbering')}</span><strong>{t('inspector.visible')}</strong></div></Field>
                 </TabsContent>
                 <footer><button type="button" className="saved-button" disabled><Check /> {saveError ? t('save.notSaved') : saved ? t('save.saved') : t('save.saving')}</button><button type="button" className="trash-button" disabled={manuscript.pages.length === 1} onClick={deletePage} aria-label={t('inspector.delete')}><Trash2 /></button></footer>
@@ -449,15 +533,30 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
           </aside>
         )}
 
+        <Dialog open={pendingImport !== null} onOpenChange={(open) => { if (!open) setPendingImport(null); }}>
+          <DialogContent showCloseButton={false}>
+            <DialogTitle className="text-base text-zinc-100">{t('json.replaceTitle')}</DialogTitle>
+            <DialogDescription className="text-zinc-400">{t('json.replaceBody')}</DialogDescription>
+            <div className="mt-2 flex justify-end gap-2">
+              <DialogClose render={<button className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100" />}>
+                {t('json.cancel')}
+              </DialogClose>
+              <button type="button" autoFocus onClick={() => { if (pendingImport) void runImportJson(pendingImport); }} className="rounded-md bg-destructive-fill px-3 py-1.5 text-sm font-medium text-white hover:bg-[#D63F46]">
+                {t('json.confirm')}
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <input ref={imageInputRef} hidden type="file" accept="image/*" onChange={(event) => { chooseImage(event.target.files?.[0]); event.target.value = ''; }} />
-        <input ref={importInputRef} hidden type="file" accept="application/json,.json" onChange={(event) => { void importJson(event.target.files?.[0]); event.target.value = ''; }} />
+        <input ref={importInputRef} hidden type="file" accept="application/json,.json" onChange={(event) => { setPendingImport(event.target.files?.[0] ?? null); event.target.value = ''; }} />
       </section>
     </main>
   );
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <label className="field"><span>{label}</span>{children}</label>;
+  return <div className="field"><span>{label}</span>{children}</div>;
 }
 
 function ToolButton({ label, onClick, active, disabled, children }: { label: string; onClick: () => void; active?: boolean; disabled?: boolean; children: React.ReactNode }) {

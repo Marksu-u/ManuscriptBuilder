@@ -4,8 +4,10 @@ export type ThemeId = 'royal' | 'arcane' | 'datapad' | 'dossier';
 export type TextAlign = 'left' | 'center' | 'right';
 export type Page = { id: string; title: string; body: string; align: TextAlign; image?: string };
 export type Manuscript = { name: string; pages: Page[]; activeId: string; theme: ThemeId };
+export type ManuscriptExport = { version: 1; exportedAt: string; manuscript: Manuscript };
 
 export const STORAGE_KEY = 'boh-manuscript-v1';
+export const MAX_MANUSCRIPT_JSON_BYTES = 3_000_000;
 export const themes: Record<ThemeId, { name: string; family: string; label: string }> = {
   royal: { name: 'Royal decree', family: 'Medieval', label: 'BY ORDER OF THE CROWN' },
   arcane: { name: 'Arcane grimoire', family: 'Fantasy', label: 'THE THIRD CONJURATION' },
@@ -36,15 +38,32 @@ export const manuscriptSchema = z.object({
   })).min(1).max(50),
 }).superRefine((value, ctx) => {
   if (new Set(value.pages.map(page => page.id)).size !== value.pages.length || !value.pages.some(page => page.id === value.activeId)) {
-    ctx.addIssue({code:'custom', message:'Pages must have unique IDs and a valid active page.'});
+    ctx.addIssue({ code: 'custom', message: 'Pages must have unique IDs and a valid active page.' });
   }
-  if (JSON.stringify(value).length > 3_000_000) ctx.addIssue({code:'custom',message:'This manuscript is too large. Use smaller illustrations.'});
+  if (JSON.stringify(value).length > MAX_MANUSCRIPT_JSON_BYTES) ctx.addIssue({ code: 'custom', message: 'This manuscript is too large. Use smaller illustrations.' });
 });
 
 export function validManuscript(value: unknown): value is Manuscript {
   return manuscriptSchema.safeParse(value).success;
 }
 
+const manuscriptExportSchema = z.object({
+  version: z.literal(1),
+  exportedAt: z.string().datetime(),
+  manuscript: manuscriptSchema,
+});
+
+export function exportManuscript(manuscript: Manuscript): ManuscriptExport {
+  return { version: 1, exportedAt: new Date().toISOString(), manuscript };
+}
+
+export function parseManuscriptExport(value: unknown): Manuscript | null {
+  const current = manuscriptExportSchema.safeParse(value);
+  if (current.success) return current.data.manuscript;
+  const legacy = manuscriptSchema.safeParse(value);
+  return legacy.success ? legacy.data : null;
+}
+
 export function blankManuscript(name: string, theme: ThemeId): Manuscript {
-  return {name, theme, activeId:'page-1', pages:[{id:'page-1', title:'Untitled page', body:'Begin writing here…', align:'left'}]};
+  return { name, theme, activeId: 'page-1', pages: [{ id: 'page-1', title: 'Untitled page', body: 'Begin writing here…', align: 'left' }] };
 }
