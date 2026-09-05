@@ -4,18 +4,172 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["manuscript"]
+  schemas  = ["public", "manuscript"]
 }
 
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+// CharacterRole, CharacterStyle, RelationshipType, RelationshipTag were converted
+// to free-text String columns in migration open_catalog_columns to support
+// user-defined custom catalog values. The catalog defaults live in lib/catalog/.
+
+enum DynastySetting {
+  FANTASY
+  SCI_FI
+  HISTORICAL
+  MODERN
+  HORROR
+  OTHER
+
+  @@schema("public")
+}
+
+enum CharacterGender {
+  MALE
+  FEMALE
+  NON_BINARY
+  UNKNOWN
+
+  @@schema("public")
+}
+
+enum AppSource {
+  DYNASTY_TREE_BUILDER
+
+  @@schema("public")
+}
+
+enum ReportReason {
+  ILLEGAL_CONTENT
+  HATE_SPEECH
+  SPAM
+  OTHER
+
+  @@schema("public")
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+
+  @@schema("public")
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
 model User {
+  id         String   @id @default(cuid())
+  supabaseId String   @unique
+  /// Stored attribute, not an identity — supabaseId is the key. Deliberately
+  /// not @unique: see migration drop_user_email_unique.
+  email      String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  dynasties   Dynasty[]
+  manuscripts Manuscript[]
+  assets      ManuscriptAsset[]
+
+  @@map("users")
+  @@schema("public")
+}
+
+model Dynasty {
+  id        String         @id @default(cuid())
+  name      String
+  slug      String         @unique
+  setting   DynastySetting @default(FANTASY)
+  /// Chosen crest seed. Null means "derive from slug", so existing dynasties get
+  /// a stable crest with no backfill and a rename never changes the arms.
+  crestSeed String?
+  isPublic  Boolean        @default(false)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  characters    Character[]
+  relationships Relationship[]
+
+  @@index([ownerId])
+  @@map("dynasties")
+  @@schema("public")
+}
+
+model Character {
+  id        String          @id @default(cuid())
+  name      String
+  alias     String?
+  // flags replaces role + isFounder + isLost — open array of permanent genealogical facts
+  flags     String[]        @default([])
+  style     String          @default("OTHER")
+  gender    CharacterGender @default(UNKNOWN)
+  note      String?
+  posX      Float           @default(0)
+  posY      Float           @default(0)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  dynastyId String
+  dynasty   Dynasty @relation(fields: [dynastyId], references: [id], onDelete: Cascade)
+
+  relationsFrom Relationship[] @relation("RelationshipFrom")
+  relationsTo   Relationship[] @relation("RelationshipTo")
+
+  @@index([dynastyId])
+  @@map("characters")
+  @@schema("public")
+}
+
+model Relationship {
+  id        String   @id @default(cuid())
+  // type is restricted to PARENT | SPOUSE | ADOPTED
+  type      String   @default("PARENT")
+  hook      String?
+  isMutual  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dynastyId String
+  dynasty   Dynasty @relation(fields: [dynastyId], references: [id], onDelete: Cascade)
+
+  fromId String
+  from   Character @relation("RelationshipFrom", fields: [fromId], references: [id], onDelete: Cascade)
+
+  toId String
+  to   Character @relation("RelationshipTo", fields: [toId], references: [id], onDelete: Cascade)
+
+  @@index([dynastyId])
+  @@index([fromId])
+  @@index([toId])
+  @@map("relationships")
+  @@schema("public")
+}
+
+model Report {
+  id        String       @id @default(cuid())
+  source    AppSource
+  shareSlug String
+  reason    ReportReason
+  details   String?
+  status    ReportStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+
+  @@index([source])
+  @@index([status])
+  @@map("reports")
+  @@schema("public")
+}
+
+// Retained for compatibility with deployed clients during the shared-account rollout.
+model LegacyManuscriptUser {
   id         String   @id @default(cuid())
   supabaseId String   @unique
   email      String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  manuscripts Manuscript[]
-  assets      ManuscriptAsset[]
 
   @@map("users")
   @@schema("manuscript")

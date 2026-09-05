@@ -18,7 +18,7 @@ export async function getAuthUser(): Promise<User> {
   if (!user) redirect("/login");
 
   const existing = await prisma.user.findUnique({ where: { supabaseId: user.id } });
-  if (existing) return existing;
+  if (existing && (!user.email || existing.email === user.email)) return existing;
   if (!user.email) throw new Error("Signed-in identity has no email address");
   return ensureAppUser(user.id, user.email);
 }

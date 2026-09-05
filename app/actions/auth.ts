@@ -2,7 +2,6 @@
 
 import { redirect } from "next/navigation";
 import { ensureAppUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -39,18 +38,14 @@ export async function deleteAccount(): Promise<{ success: true } | { error: stri
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "You're not signed in." };
 
-  try {
-    await prisma.user.deleteMany({ where: { supabaseId: user.id } });
-  } catch {
-    return { error: "We couldn't delete your Manuscript Builder data. Please try again." };
-  }
-
+  // The auth deletion trigger removes the shared user and both apps' data
+  // atomically. A failed Auth API request must not erase application data.
   try {
     const admin = createAdminClient();
     const { error } = await admin.auth.admin.deleteUser(user.id);
-    if (error) return { error: "Your tool data was deleted, but removing the shared sign-in failed. Please try again." };
+    if (error) return { error: "We couldn't delete your shared account. Please try again." };
   } catch {
-    return { error: "Your tool data was deleted, but removing the shared sign-in failed. Please try again." };
+    return { error: "We couldn't delete your shared account. Please try again." };
   }
 
   try {

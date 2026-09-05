@@ -1,0 +1,21 @@
+-- Drop the uniqueness requirement on users.email.
+--
+-- supabaseId is this table's identity: it is what auth.users is keyed on, what
+-- every lookup uses, and what the account-deletion trigger sweeps by. email is
+-- a stored attribute, never a lookup key — nothing in the app queries by it.
+--
+-- Requiring it to be globally unique therefore bought nothing and created a
+-- permanent lockout: any second identity arriving with an address some row
+-- already holds fails the upsert in syncUser/ensureAppUser, which surfaces as
+-- /login?error=sync_failed on every attempt, forever. Two ways in:
+--
+--   1. An auth.users row is deleted while our row survives (a partly-failed
+--      account deletion), then the person signs in again with the same address.
+--   2. A user changes the email on their Google account to one another row
+--      already holds — which the same commit makes possible, because the upsert
+--      now refreshes email rather than leaving it stale.
+--
+-- Reversible: re-adding the index requires the column to hold no duplicates.
+--   CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
+
+DROP INDEX IF EXISTS "users_email_key";

@@ -15,7 +15,10 @@
     "typecheck": "tsc --noEmit",
     "icons": "node scripts/generate-icons.mjs",
     "test": "node --test tests/*.test.mjs",
-    "test:database": "node scripts/check-manuscript-database.mjs"
+    "test:database": "node scripts/check-manuscript-database.mjs",
+    "db:deploy": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
+    "test:shared-database": "node scripts/check-shared-database.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
