@@ -1,0 +1,615 @@
+{
+  "site": {
+    "name": "Manuscript Builder",
+    "description": "Créez des aides de jeu, lettres, grimoires et datapads de science-fiction pour vos JdR. Mettez en forme des manuscrits illustrés puis exportez-les en PNG ou JSON. Gratuit, sans compte.",
+    "jsonLdDescription": "Un éditeur gratuit d'aides de jeu pour créer dans votre navigateur des lettres illustrées, décrets royaux, grimoires, dossiers et datapads de science-fiction.",
+    "orgDescription": "Des outils web gratuits pour le jeu sur table.",
+    "ogAlt": "Manuscript Builder — lettres sur parchemin et aides de jeu de science-fiction pour vos univers"
+  },
+  "consent": {
+    "label": "Mesure d'audience",
+    "body": "Nous aimerions mesurer la fréquentation du site avec Google Analytics, ce qui dépose des cookies sur votre appareil. Le site fonctionne exactement de la même façon si vous refusez.",
+    "policy": "Politique des cookies",
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "prefs": {
+      "granted": "Vous avez accepté la mesure d'audience.",
+      "denied": "Vous avez refusé la mesure d'audience. Aucun cookie Google Analytics n'est déposé.",
+      "unanswered": "Vous n'avez pas encore répondu. La mesure d'audience est désactivée.",
+      "note": "Vous pouvez changer d'avis à tout moment ; refuser après avoir accepté supprime immédiatement les cookies concernés. Votre choix est conservé six mois sur cet appareil, puis la question vous est reposée.",
+      "pending": "Chargement…"
+    }
+  },
+  "footer": {
+    "partOf": "fait partie de",
+    "tagline": "des outils gratuits, pour toujours.",
+    "moreTools": "Autres outils",
+    "legal": "Mentions Légales",
+    "privacy": "Confidentialité",
+    "terms": "CGU",
+    "cookies": "Cookies",
+    "twitter": "X",
+    "source": "Code source"
+  },
+  "language": {
+    "label": "Langue",
+    "en": "English",
+    "fr": "Français"
+  },
+  "legalPages": {
+    "back": "← Retour à Manuscript Builder",
+    "updated": "Dernière mise à jour : {date}",
+    "cookies": {
+      "title": "Politique des Cookies",
+      "metaTitle": "Politique des Cookies · Bag Of Holding Tools",
+      "updated": "Août 2026",
+      "s1": {
+        "heading": "1. Qu'est-ce qu'un cookie ?",
+        "p1": "Un cookie est un petit fichier déposé sur votre navigateur lors de la consultation d'un site. Cette page vous explique quels cookies et technologies de stockage sont utilisés par Bag Of Holding Tools et ses outils, dont Manuscript Builder (ci-après, le « Site »).",
+        "p2": "Le Site n'utilise <b>aucun cookie publicitaire, de réseau social ni de personnalisation</b>. Vos usages ne sont jamais revendus ni exploités à des fins commerciales. Seule une <b>mesure d'audience</b>, décrite à l'article 4, est susceptible d'être activée — et uniquement si vous l'acceptez explicitement."
+      },
+      "s2": {
+        "heading": "2. Cookies techniques et fonctionnels",
+        "p1": "Ces cookies sont strictement nécessaires au fonctionnement du Site. Conformément à la réglementation, ils ne requièrent pas votre consentement.",
+        "item1": "<b>Cookie de session Supabase</b> (par ex. <code>sb-…-auth-token</code>) — vous maintient connecté à votre compte. Déposé uniquement si vous créez un compte et vous connectez. Durée : jusqu'à votre déconnexion ou l'expiration de la session."
+      },
+      "s3": {
+        "heading": "3. Stockage local (mode invité)",
+        "p1": "En mode invité (sans compte), le Site utilise le stockage local (<code>localStorage</code>) de votre navigateur pour enregistrer votre travail sur votre propre appareil. Ces données ne sont jamais envoyées à nos serveurs et sont supprimées lorsque vous videz le stockage de votre navigateur. Ce mécanisme est strictement nécessaire et ne requiert pas votre consentement.",
+        "p2": "Votre réponse à la demande de consentement décrite à l'article 4 y est également conservée (clé <code>boh-analytics-consent</code>), afin de ne pas vous reposer la question à chaque visite. Cet enregistrement est lui aussi strictement nécessaire : sans lui, votre refus ne pourrait pas être respecté."
+      },
+      "s4": {
+        "heading": "4. Mesure d'audience (soumise à votre consentement)",
+        "p1": "Avec votre accord préalable, le Site utilise <b>Google Analytics 4</b> pour mesurer sa fréquentation : nombre de visites, pages consultées, provenance approximative et type d'appareil. Cela nous sert uniquement à savoir quels outils méritent d'être développés.",
+        "item1": "<code>_ga</code> et <code>_ga_<stream>identifiant du flux</stream></code> — distinguent les visiteurs et les sessions. Durée : 13 mois maximum.",
+        "p2": "<b>Rien n'est déposé tant que vous n'avez pas accepté.</b> Si vous refusez, ou si vous ne répondez pas, aucun cookie de mesure d'audience n'est créé et aucune donnée n'est transmise à Google. Le Site fonctionne exactement de la même façon dans les deux cas : aucune fonctionnalité n'est conditionnée à votre acceptation.",
+        "p3": "Le contenu que vous créez — manuscrits, pages, textes, notes et illustrations — n'est jamais transmis à Google. Google agit comme sous-traitant ; des données peuvent être transférées aux États-Unis dans les conditions décrites à l'article 9 de la Charte de Confidentialité."
+      },
+      "s5": {
+        "heading": "5. Cookies non utilisés",
+        "p1": "Par transparence, les catégories de cookies suivantes ne sont <b>jamais</b> utilisées par le Site :",
+        "items": [
+          "Cookies publicitaires — néant",
+          "Cookies de réseaux sociaux — néant",
+          "Cookies de personnalisation de contenu — néant",
+          "Revente ou partage de vos données à des fins commerciales — néant"
+        ]
+      },
+      "s6": {
+        "heading": "6. Paramétrer votre navigateur",
+        "p1": "Vous pouvez à tout moment configurer votre navigateur pour bloquer ou supprimer les cookies. Attention : sans le cookie de session, vous ne pourrez pas rester connecté à votre compte. Pour en savoir plus, consultez le site de la CNIL : <cnil>cnil.fr</cnil>.",
+        "cnilUrl": "https://www.cnil.fr/fr/cookies-et-autres-traceurs"
+      }
+    },
+    "terms": {
+      "title": "Conditions Générales d'Utilisation",
+      "metaTitle": "Conditions Générales d'Utilisation · Bag Of Holding Tools",
+      "updated": "Août 2026",
+      "s1": {
+        "heading": "1. Objet",
+        "p1": "Les présentes conditions générales d'utilisation (« CGU ») régissent l'accès et l'utilisation de tous les outils publiés sous Bag Of Holding Tools par une personne physique agissant à titre personnel et non commercial, publiant sous le pseudonyme {alias} conformément à l'article 6-III-2 de la LCEN (« Nous »), dont Manuscript Builder (ci-après, ensemble, les « Outils »). Chaque Outil est gratuit, avec ou sans compte, et n'implique aucun paiement."
+      },
+      "s2": {
+        "heading": "2. Acceptation",
+        "p1": "En utilisant un Outil, vous acceptez pleinement et sans réserve les présentes CGU. Si vous n'acceptez pas ces conditions, vous ne devez pas utiliser les Outils."
+      },
+      "s3": {
+        "heading": "3. Capacité juridique",
+        "p1": "Les Outils sont accessibles à toute personne disposant de la capacité juridique pour s'engager au titre des présentes. Une personne mineure ne peut les utiliser qu'avec l'accord de son représentant légal."
+      },
+      "s4": {
+        "heading": "4. Compte",
+        "p1": "La création d'un compte est facultative et sert uniquement à sauvegarder votre travail dans le cloud et à y accéder depuis plusieurs appareils. Un même compte fonctionne sur l'ensemble des Outils. Vous êtes responsable de la sécurité de votre compte et vous engagez à ne pas laisser un tiers l'utiliser à votre place."
+      },
+      "s5": {
+        "heading": "5. Disponibilité et absence de garantie",
+        "p1": "Les Outils sont fournis « en l'état », sans garantie de disponibilité, d'exactitude ou d'adéquation à un usage particulier. Nous ne garantissons pas que les Outils seront exempts d'anomalies ou fonctionneront sans interruption, et pourrons suspendre l'accès pour maintenance ou mise à jour."
+      },
+      "s6": {
+        "heading": "6. Votre contenu",
+        "p1": "Vous conservez la pleine propriété des données créées dans un Outil. Si vous rendez un contenu public ou partagez un fichier exporté, vous choisissez ses destinataires et restez responsable de cette diffusion."
+      },
+      "s7": {
+        "heading": "7. Données concernant d'autres personnes",
+        "p1": "Certains Outils permettent de saisir des informations sur d'autres personnes réelles. Vous êtes seul responsable de disposer du droit de saisir ces informations et de l'usage que vous en faites. Vous ne devez saisir aucune donnée concernant une personne que vous n'êtes pas autorisé à partager. En cas de réclamation relative à un contenu concernant une personne réelle, nous pouvons le supprimer ou en restreindre l'accès sans préavis, et vous acceptez de nous garantir contre toute réclamation résultant des données que vous avez saisies sur autrui."
+      },
+      "s8": {
+        "heading": "8. Comportements prohibés",
+        "p1": "Il est notamment interdit :",
+        "items": [
+          "de créer ou partager un contenu illégal, préjudiciable, diffamatoire, haineux, incitant à la violence ou portant atteinte aux droits de tiers ;",
+          "de perturber, ralentir ou tenter d'intrusion dans les systèmes ou infrastructures des Outils ;",
+          "de contourner les dispositifs de sécurité ou d'authentification ;",
+          "de revendre, monnayer ou concéder l'accès aux Outils."
+        ]
+      },
+      "s9": {
+        "heading": "9. Signalement et modération",
+        "p1": "Les contenus publics sont accessibles à toute personne disposant du lien. Les signalements sont examinés et peuvent conduire à rendre un contenu privé ou à le supprimer sans préavis. Pour signaler un contenu : <mail>{email}</mail>."
+      },
+      "s10": {
+        "heading": "10. Propriété intellectuelle",
+        "p1": "Nous demeurons titulaires des droits de propriété intellectuelle sur les Outils. Les présentes CGU n'opèrent aucun transfert de ces droits à votre bénéfice, en dehors d'un droit d'utilisation personnel et non exclusif limité à la durée de votre utilisation."
+      },
+      "s11": {
+        "heading": "11. Responsabilité",
+        "p1": "Les Outils étant fournis gratuitement, et dans toute la mesure permise par la loi, nous ne saurions être tenus responsables des dommages résultant de l'utilisation ou de l'impossibilité d'utiliser un Outil, ni des contenus créés, partagés ou consultés par les utilisateurs."
+      },
+      "s12": {
+        "heading": "12. Résiliation",
+        "p1": "Vous pouvez supprimer votre compte à tout moment. Nous nous réservons le droit de suspendre l'accès ou de supprimer tout contenu, dans tout Outil, en cas de violation des présentes."
+      },
+      "s13": {
+        "heading": "13. Données personnelles",
+        "p1": "Le traitement de vos données personnelles est décrit dans notre <privacy>Charte de Confidentialité</privacy>."
+      },
+      "s14": {
+        "heading": "14. Modifications",
+        "p1": "Nous pouvons modifier les présentes CGU à mesure que des Outils sont ajoutés ou modifiés. Toute utilisation postérieure à une mise à jour vaut acceptation des CGU révisées."
+      },
+      "s15": {
+        "heading": "15. Langue",
+        "p1": "Les présentes CGU sont rédigées en français et en anglais. En cas de contradiction ou de contestation sur la signification d'un terme, la version française prévaut."
+      },
+      "s16": {
+        "heading": "16. Loi applicable",
+        "p1": "Les présentes CGU sont régies par la loi française. Tout litige non résolu à l'amiable relèvera de la compétence exclusive des tribunaux français."
+      },
+      "s17": {
+        "heading": "17. Contact",
+        "p1": "Toute question relative aux présentes CGU : <mail>{email}</mail>."
+      }
+    },
+    "notice": {
+      "title": "Mentions Légales",
+      "metaTitle": "Mentions Légales · Bag Of Holding Tools",
+      "updated": "Août 2026",
+      "publisher": {
+        "heading": "Édition du site",
+        "p1": "Le site Bag Of Holding Tools et l'ensemble de ses outils, dont Manuscript Builder (ci-après, le « Site »), sont édités à titre personnel et non commercial par une personne physique (ci-après, l'« Éditeur »). Ses coordonnées ont été communiquées à l'hébergeur, conformément à l'article 6-III-2 de la LCEN.",
+        "p2": "L'Éditeur peut être contacté à l'adresse email <mail>{email}</mail>."
+      },
+      "director": {
+        "heading": "Directeur de la publication",
+        "p1": "Le directeur de la publication est {alias}."
+      },
+      "host": {
+        "heading": "Hébergement du site",
+        "p1": "Le Site est hébergé par {host}, {address} (<hostLink>vercel.com</hostLink>). L'hébergeur peut être contacté à l'adresse <hostMail>{hostEmail}</hostMail>.",
+        "p2": "Les données de compte sont stockées par {dataHost}, dans une région située au sein de l'Union européenne (<dataLink>supabase.com</dataLink>)."
+      },
+      "ip": {
+        "heading": "Propriété intellectuelle",
+        "p1": "Toutes les marques, textes, illustrations, images ainsi que les applications informatiques qui composent le Site sont protégés au titre de la propriété intellectuelle et sont la propriété de l'Éditeur, sauf mentions particulières. Toute reproduction, représentation ou adaptation, en tout ou partie, sans l'accord préalable et écrit de l'Éditeur, est strictement interdite.",
+        "p2": "Les données que vous créez au sein d'un outil (par exemple vos manuscrits et illustrations) vous appartiennent et ne sont pas revendiquées par l'Éditeur."
+      },
+      "links": {
+        "heading": "Liens hypertextes",
+        "p1": "Le Site peut contenir des liens vers d'autres sites édités et gérés par des tiers. L'Éditeur ne saurait être tenu responsable, directement ou indirectement, du contenu de ces sites tiers."
+      }
+    },
+    "privacy": {
+      "title": "Charte de Confidentialité",
+      "metaTitle": "Charte de Confidentialité · Bag Of Holding Tools",
+      "updated": "Août 2026",
+      "preamble": {
+        "heading": "Préambule",
+        "p1": "La présente charte s'applique à l'ensemble des outils publiés sous Bag Of Holding Tools, dont Manuscript Builder. Tous les outils partagent le même système de compte, une seule charte les couvre donc tous. Elle a pour objet de vous expliquer comment sont collectées, traitées et conservées vos données à caractère personnel, conformément à la loi n° 78-17 du 6 janvier 1978 (« Informatique et Libertés ») et au règlement (UE) 2016/679 (« RGPD »)."
+      },
+      "s1": {
+        "heading": "1. Définition",
+        "p1": "Le terme « données à caractère personnel » désigne toute information permettant de vous identifier directement ou indirectement, comme votre adresse email."
+      },
+      "s2": {
+        "heading": "2. Responsable de traitement",
+        "p1": "Le responsable de traitement est l'éditeur du Site : une personne physique agissant à titre personnel et non commercial, publiant sous le pseudonyme {alias} conformément à l'article 6-III-2 de la LCEN (« Nous »). Ses coordonnées complètes sont détenues par l'hébergeur.",
+        "p2": "Le responsable de traitement peut être contacté à tout moment à l'adresse <mail>{email}</mail>. Cette adresse est le point de contact unique pour l'ensemble des demandes relatives à vos données."
+      },
+      "s3": {
+        "heading": "3. Mode invité (sans compte)",
+        "p1": "Vous pouvez utiliser tous les outils sans créer de compte. En mode invité, vos données (manuscrits, pages, textes, mise en forme et illustrations) sont stockées uniquement dans votre navigateur (localStorage) et ne sont jamais envoyées à nos serveurs. L'export en PNG ou JSON se fait entièrement sur votre appareil. Nous n'avons aucun accès aux données du mode invité.",
+        "p2": "Le mode invité n'est pas exclu de la mesure d'audience facultative décrite à l'article 5. Celle-ci ne porte que sur la navigation (pages consultées, type d'appareil), jamais sur le contenu que vous créez, et elle reste désactivée tant que vous ne l'avez pas acceptée."
+      },
+      "s4": {
+        "heading": "4. Données collectées et finalités (mode compte)",
+        "p1": "La création d'un compte est facultative et sert uniquement à sauvegarder votre travail dans le cloud. Lorsque vous vous connectez avec Google, nous collectons :",
+        "items": [
+          "Votre adresse email (fournie par Google) ;",
+          "Les données que vous créez dans chaque outil (par ex. manuscrits, pages, textes, mise en forme et illustrations pour Manuscript Builder)."
+        ],
+        "p2": "Nous ne collectons ni votre nom, ni votre photo de profil, ni aucune autre donnée de votre compte Google au-delà de votre adresse email. La base juridique de ces traitements est l'exécution du contrat que vous concluez en créant un compte. Vos données servent exclusivement à vous identifier et à vous permettre d'accéder à votre travail entre vos sessions et appareils."
+      },
+      "s5": {
+        "heading": "5. Destinataires et sous-traitants",
+        "p1": "Vos données de compte sont traitées par les prestataires suivants, aux seules fins de fournir le service :",
+        "item1": "<b>Supabase</b> (région Union européenne) — authentification et hébergement de la base de données ;",
+        "item2": "<b>Vercel</b> — hébergement de l'application ;",
+        "item3": "<b>Google</b> — fournisseur de connexion (OAuth).",
+        "item4": "<b>Google Analytics</b> — mesure d'audience, <b>uniquement si vous l'avez acceptée</b>. Aucune donnée ne lui est transmise avant votre accord, et votre contenu ne lui est jamais transmis. Voir la <cookies>Politique des Cookies</cookies>.",
+        "p2": "Vos données ne sont jamais vendues, louées ni partagées avec un tiers en dehors de ces prestataires."
+      },
+      "s6": {
+        "heading": "6. Durée de conservation",
+        "p1": "Vos données de compte sont conservées tant que votre compte existe. Vous pouvez demander la suppression de votre compte et de toutes les données associées à tout moment en écrivant à <mail>{email}</mail>. La suppression est définitive."
+      },
+      "s7": {
+        "heading": "7. Sécurité",
+        "p1": "Nous mettons en œuvre les mesures techniques et organisationnelles appropriées pour préserver la sécurité, l'intégrité et la confidentialité de vos données et empêcher qu'un tiers non autorisé y ait accès."
+      },
+      "s8": {
+        "heading": "8. Hébergement",
+        "p1": "Vos données de compte sont stockées sur les serveurs de Supabase, dans une région située au sein de l'Union européenne."
+      },
+      "s9": {
+        "heading": "9. Transfert hors de l'Union européenne",
+        "p1": "Vercel et Google sont établis aux États-Unis. Lorsque vos données sont transférées hors de l'Union européenne, ce transfert est encadré soit par une décision d'adéquation (dont le EU–US Data Privacy Framework), soit par les clauses contractuelles types approuvées par la Commission européenne."
+      },
+      "s10": {
+        "heading": "10. Vos droits",
+        "p1": "Conformément au RGPD, vous disposez des droits suivants :",
+        "items": [
+          "Droit d'accès, de rectification et d'effacement de vos données ;",
+          "Droit à la limitation du traitement ;",
+          "Droit à la portabilité (recevoir vos données dans un format lisible par machine) ;",
+          "Droit d'opposition au traitement ;",
+          "Droit de retirer votre consentement à tout moment ;",
+          "Droit de définir des directives relatives au sort de vos données après votre décès."
+        ],
+        "p2": "Ces droits s'exercent en écrivant à <mail>{email}</mail>. Nous répondons dans un délai d'un mois à compter de la réception de votre demande."
+      },
+      "s11": {
+        "heading": "11. Réclamation auprès d'une autorité de contrôle",
+        "p1": "Vous avez le droit d'introduire une réclamation auprès d'une autorité de contrôle, en France la <cnil>CNIL</cnil>, si vous estimez que le traitement de vos données constitue une violation des textes applicables.",
+        "cnilUrl": "https://www.cnil.fr"
+      },
+      "s12": {
+        "heading": "12. Données concernant des tiers",
+        "p1": "Certains outils vous permettent de saisir des informations sur d'autres personnes. Vous êtes responsable du droit de saisir ces informations — voir nos <terms>Conditions Générales d'Utilisation</terms>. Si un tiers souhaite que des informations le concernant soient supprimées d'un compte qu'il ne contrôle pas, il peut nous contacter et nous transmettrons la demande au titulaire du compte ou y donnerons suite lorsque la loi l'exige."
+      },
+      "s13": {
+        "heading": "13. Mineurs",
+        "p1": "Nos outils ne sont pas destinés aux enfants de moins de 15 ans. Si vous pensez qu'un enfant de moins de 15 ans a créé un compte, contactez-nous et nous le supprimerons."
+      },
+      "s14": {
+        "heading": "14. Modifications",
+        "p1": "Nous pouvons modifier la présente charte à mesure que des outils sont ajoutés ou modifiés. Les modifications entrent en vigueur dès leur publication, reflétée par la date de mise à jour ci-dessus."
+      },
+      "s15": {
+        "heading": "15. Contact",
+        "p1": "Toute question relative à la présente charte : <mail>{email}</mail>."
+      }
+    }
+  },
+  "notFound": {
+    "metaTitle": "Page introuvable",
+    "code": "404",
+    "heading": "Cette page a disparu.",
+    "body": "Le manuscrit a peut-être été déplacé, renommé ou jamais écrit.",
+    "canvas": "Ouvrir l'éditeur",
+    "about": "À propos de Manuscript Builder"
+  },
+  "login": {
+    "metaTitle": "Connexion",
+    "heading": "Connexion",
+    "subtitle": "Enregistrez vos manuscrits sur votre compte et reprenez-les sur un autre appareil.",
+    "google": "Continuer avec Google",
+    "redirecting": "Redirection…",
+    "legal": "En continuant, vous acceptez les <terms>CGU</terms> et reconnaissez avoir lu la <privacy>Charte de Confidentialité</privacy>.",
+    "guest": "Aucun compte n'est nécessaire pour utiliser l'outil.",
+    "guestLink": "Essayer en mode invité →",
+    "loading": "Chargement de la connexion",
+    "errors": {
+      "auth_callback_failed": "Nous n'avons pas pu terminer la connexion. Veuillez réessayer.",
+      "sync_failed": "Vous êtes connecté, mais votre compte n'a pas pu être chargé. Veuillez réessayer dans quelques instants.",
+      "generic": "Échec de la connexion. Veuillez réessayer.",
+      "unknown": "Une erreur est survenue"
+    }
+  },
+  "account": {
+    "metaTitle": "Compte",
+    "description": "Gérez votre compte Manuscript Builder et votre connexion partagée.",
+    "back": "← Vos manuscrits",
+    "signOut": "Se déconnecter",
+    "heading": "Compte",
+    "email": "Adresse email",
+    "saved": "Manuscrits enregistrés",
+    "danger": {
+      "heading": "Zone sensible",
+      "body": "La suppression de votre compte efface définitivement votre connexion partagée et tout ce qui y est rattaché. Cette action est irréversible.",
+      "ecosystem": "Un seul compte couvre toutes les applications Bag Of Holding Tools :"
+    },
+    "delete": {
+      "trigger": "Supprimer le compte",
+      "title": "Supprimer votre compte",
+      "body": "Cette action supprime définitivement votre compte partagé et tout ce qui y est rattaché dans chaque application Bag Of Holding Tools. Elle est irréversible.",
+      "confirmLabel": "Saisissez <b>{email}</b> pour confirmer",
+      "confirm": "Supprimer définitivement",
+      "deleting": "Suppression…"
+    }
+  },
+  "dashboard": {
+    "metaTitle": "Vos manuscrits",
+    "description": "Ouvrez et gérez vos manuscrits enregistrés.",
+    "heading": "Vos manuscrits",
+    "signOut": "Se déconnecter",
+    "count": "{count, plural, =0 {Un écrin pour les histoires que vos joueurs peuvent tenir en main.} one {# manuscrit enregistré} other {# manuscrits enregistrés}}",
+    "create": "Nouveau manuscrit",
+    "card": {
+      "fallbackStyle": "Manuscrit",
+      "pages": "{count, plural, one {# page} other {# pages}}",
+      "updated": "Mis à jour le {date}"
+    },
+    "empty": {
+      "title": "Votre premier manuscrit commence ici",
+      "description": "Créez une lettre, un grimoire ou une transmission secrète. Vos manuscrits réapparaîtront ici à votre retour.",
+      "action": "Créer un manuscrit →"
+    },
+    "new": {
+      "metaTitle": "Nouveau manuscrit",
+      "back": "← Vos manuscrits",
+      "heading": "Nouveau manuscrit",
+      "description": "Choisissez un nom et un style de départ. Vous pourrez les modifier plus tard.",
+      "name": "Nom",
+      "namePlaceholder": "La convocation de Blackmere",
+      "style": "Style",
+      "create": "Créer le manuscrit",
+      "creating": "Création…",
+      "cancel": "Annuler"
+    },
+    "loading": "Chargement de vos manuscrits…",
+    "error": {
+      "heading": "Impossible de charger vos manuscrits",
+      "body": "Les données de votre compte n'ont pas été modifiées. Réessayez ou contactez support@bagofholdingtools.com si le problème persiste.",
+      "retry": "Réessayer",
+      "home": "Retour à l'accueil"
+    },
+    "guestImport": {
+      "heading": "Emportez votre brouillon local",
+      "body": "Importez « {name} » dans votre compte pour l'ouvrir sur d'autres appareils. La copie de votre navigateur sera conservée.",
+      "import": "Importer le brouillon local",
+      "importing": "Importation…",
+      "dismiss": "Plus tard",
+      "failed": "Échec de l'importation. Veuillez réessayer."
+    }
+  },
+  "actions": {
+    "manuscripts": {
+      "untitled": "Page sans titre",
+      "begin": "Commencez à écrire ici…",
+      "invalidCreate": "Saisissez un nom (80 caractères maximum) et choisissez un style.",
+      "createFailed": "Le manuscrit n'a pas pu être créé. Veuillez réessayer.",
+      "invalidImport": "Ce brouillon local est invalide ou trop volumineux. Exportez une sauvegarde JSON et vérifiez son contenu.",
+      "importFailed": "Le brouillon n'a pas pu être importé. La copie de votre navigateur reste disponible.",
+      "invalid": "Manuscrit invalide.",
+      "invalidVersion": "Version du document invalide. Rechargez le manuscrit.",
+      "saveFailed": "Échec de l'enregistrement. Vos modifications sont toujours ouvertes ; réessayez ou téléchargez une sauvegarde JSON."
+    }
+  },
+  "common": {
+    "cancel": "Annuler",
+    "close": "Fermer"
+  },
+  "home": {
+    "metaTitle": "Manuscript Builder — Créateur gratuit d'aides de jeu pour JdR",
+    "metaDescription": "Créez des aides de jeu, lettres, grimoires et datapads de science-fiction pour vos JdR. Mettez en forme des manuscrits illustrés puis exportez-les en PNG ou JSON. Gratuit, sans compte.",
+    "nav": {
+      "how": "Fonctionnement",
+      "faq": "FAQ",
+      "manuscripts": "Vos manuscrits"
+    },
+    "hero": {
+      "eyebrow": "Bag Of Holding Tools",
+      "heading": "Donnez à vos joueurs <accent>quelque chose à tenir.</accent>",
+      "lede": "Une convocation scellée à la cire. Une page arrachée à un grimoire. Une transmission qui n'aurait jamais dû arriver. Créez les aides de jeu qui donnent vie à votre univers.",
+      "cta": "Créer une aide de jeu →",
+      "dashboard": "Vos manuscrits",
+      "note": "Création gratuite. Aucun compte requis. Vos mots vous appartiennent."
+    },
+    "example": {
+      "aria": "Exemple de décret royal",
+      "kicker": "PAR ORDRE DE LA COURONNE",
+      "title": "Une convocation au<br></br>donjon de Blackmere",
+      "p1": "Qu'il soit su que, la première nuit de la lune décroissante, vous êtes convoqué au vieux donjon de Blackmere.",
+      "p2": "Ne portez ni bannière ni blason. Ne parlez de ce voyage à personne, car les routes sont surveillées.",
+      "signature": "De ma main et de mon sceau",
+      "caption": "Une histoire avant le premier jet de dés."
+    },
+    "features": {
+      "eyebrow": "De quelques mots à tout un univers",
+      "heading": "Écrivez. Habillez. Mettez entre leurs mains.",
+      "items": [
+        {
+          "title": "Une page qui mérite de circuler",
+          "body": "Écrivez des lettres, ordres secrets et découvertes. Ajoutez des illustrations et réunissez chaque page dans un même manuscrit."
+        },
+        {
+          "title": "Conçu pour tous les univers",
+          "body": "Passez d'un décret royal à un grimoire arcanique, un dossier de terrain ou un datapad orbital sans réécrire vos mots."
+        },
+        {
+          "title": "Emportez-le à la table",
+          "body": "Exportez un PNG net pour vos joueurs. Conservez une sauvegarde JSON modifiable pour reprendre l'histoire plus tard."
+        },
+        {
+          "title": "Reprenez là où vous en étiez",
+          "body": "Travaillez sans compte dans ce navigateur, ou enregistrez vos manuscrits sur votre compte et ouvrez-les depuis votre tableau de bord."
+        }
+      ]
+    },
+    "styles": {
+      "heading": "Tous les secrets n'arrivent pas sur parchemin.",
+      "body": "Quatre styles de départ. Quel que soit l'univers que vous bâtissez."
+    },
+    "faq": {
+      "heading": "Avant de commencer",
+      "jsonLdName": "Questions fréquentes sur Manuscript Builder",
+      "items": [
+        {
+          "q": "Manuscript Builder est-il gratuit ?",
+          "a": "Oui. Créez, modifiez et exportez gratuitement vos manuscrits. Aucun abonnement ni paiement n'est requis."
+        },
+        {
+          "q": "Ai-je besoin d'un compte ?",
+          "a": "Non. L'éditeur invité conserve votre brouillon dans ce navigateur. Connectez-vous si vous souhaitez enregistrer des manuscrits sur votre compte et les ouvrir sur d'autres appareils."
+        },
+        {
+          "q": "Puis-je conserver mon brouillon actuel ?",
+          "a": "Oui. Votre tableau de bord vous propose de l'importer dans votre compte. La copie d'origine reste sur votre appareil."
+        },
+        {
+          "q": "Que puis-je exporter ?",
+          "a": "Exportez la page actuelle en PNG haute résolution ou téléchargez le manuscrit complet sous forme de sauvegarde JSON modifiable."
+        }
+      ]
+    },
+    "closing": {
+      "heading": "Le prochain indice est à vous d'écrire.",
+      "cta": "Commencer votre manuscrit →"
+    },
+    "jsonLd": {
+      "subCategory": "Éditeur d'aides de jeu pour jeux de rôle sur table",
+      "description": "Créez dans votre navigateur des aides de jeu illustrées, lettres, grimoires, dossiers et datapads de science-fiction."
+    }
+  },
+  "workspace": {
+    "metaTitle": "Éditeur gratuit d'aides de jeu",
+    "metaDescription": "Créez des lettres, grimoires et datapads dans votre navigateur. Aucun compte requis.",
+    "editMetaTitle": "Modifier le manuscrit",
+    "srHeading": "Manuscript Builder — créateur gratuit d'aides de jeu pour JdR",
+    "srBody": "Créez des lettres illustrées, décrets royaux, grimoires, dossiers et datapads de science-fiction pour vos jeux de rôle sur table. Modifiez plusieurs pages, enregistrez-les localement et exportez-les en PNG ou JSON. Aucun compte requis.",
+    "aria": {
+      "workspace": "Espace de travail du manuscrit",
+      "pages": "Pages du manuscrit",
+      "inspector": "Inspecteur de page",
+      "zoom": "Contrôles du zoom"
+    },
+    "initial": {
+      "name": "La convocation de Blackmere",
+      "page1Title": "Une convocation au donjon de Blackmere",
+      "page1Body": "Qu'il soit su que, la première nuit de la lune décroissante, les personnes nommées ci-dessous sont appelées au vieux donjon de Blackmere.\n\nNe portez ni bannière ni blason. Ne parlez de ce voyage à personne, car les routes sont surveillées et les corbeaux ne portent plus les messages de la couronne.",
+      "page2Title": "L'instruction scellée",
+      "page2Body": "Ne brisez ce sceau que lorsque la cloche de l'ouest sonnera deux fois.",
+      "untitled": "Page sans titre",
+      "begin": "Commencez à écrire ici…"
+    },
+    "save": {
+      "localFailure": "Le stockage du navigateur est saturé ou indisponible. Téléchargez une sauvegarde JSON pour conserver vos modifications.",
+      "cloudFailure": "Impossible d'enregistrer sur votre compte. Réessayez ou téléchargez une sauvegarde JSON.",
+      "retry": "Réessayer l'enregistrement",
+      "download": "Télécharger le JSON",
+      "notSaved": "Non enregistré",
+      "saved": "Enregistré",
+      "saving": "Enregistrement…"
+    },
+    "image": {
+      "invalid": "Choisissez une illustration PNG, JPEG, WebP ou GIF de moins de 700 Ko.",
+      "exportFailed": "Le PNG n'a pas pu être généré. Veuillez réessayer.",
+      "uploadedAlt": "Illustration importée du manuscrit",
+      "currentAlt": "Illustration actuelle du manuscrit",
+      "label": "Illustration",
+      "add": "Ajouter une image",
+      "remove": "Supprimer"
+    },
+    "json": {
+      "invalid": "Ce fichier JSON n'est pas un manuscrit valide."
+    },
+    "toolbar": {
+      "aria": "Outils du manuscrit",
+      "fit": "Ajuster la page",
+      "pages": "Pages",
+      "undo": "Annuler",
+      "redo": "Rétablir",
+      "export": "Exporter",
+      "png": "Exporter en PNG",
+      "json": "Télécharger le JSON",
+      "import": "Importer un JSON",
+      "settings": "Réglages"
+    },
+    "navigation": {
+      "manuscripts": "Retour à vos manuscrits",
+      "home": "Retour à l'accueil",
+      "back": "Retour",
+      "waiting": "En attente de l'enregistrement de vos modifications"
+    },
+    "pages": {
+      "heading": "Pages",
+      "count": "{count} dans le manuscrit",
+      "close": "Fermer les pages",
+      "open": "Ouvrir la page {number} : {title}",
+      "add": "Ajouter une page"
+    },
+    "document": {
+      "signature": "De ma main et de mon sceau",
+      "seal": "Décoration de sceau"
+    },
+    "zoom": {
+      "in": "Zoom avant",
+      "out": "Zoom arrière",
+      "reset": "Réinitialiser le zoom"
+    },
+    "inspector": {
+      "open": "Modifier la page",
+      "close": "Fermer l'inspecteur",
+      "page": "Page {number}",
+      "tabs": {
+        "details": "Détails",
+        "style": "Style",
+        "page": "Page"
+      },
+      "title": "Titre",
+      "body": "Texte",
+      "bold": "Mettre le texte sélectionné en gras",
+      "italic": "Mettre le texte sélectionné en italique",
+      "boldText": "texte en gras",
+      "italicText": "texte en italique",
+      "alignLeft": "Aligner à gauche",
+      "alignCenter": "Centrer",
+      "alignRight": "Aligner à droite",
+      "characters": "{count} caractères",
+      "style": "Style du manuscrit",
+      "useStyle": "Utiliser le style {style}",
+      "about": "À propos de Manuscript Builder",
+      "name": "Nom du manuscrit",
+      "format": "Format",
+      "pageSize": "Taille de page",
+      "portrait": "A4 portrait",
+      "numbering": "Numérotation",
+      "visible": "Visible",
+      "delete": "Supprimer la page"
+    },
+    "account": {
+      "checking": "Vérification du compte",
+      "account": "Compte",
+      "library": "Bibliothèque",
+      "signIn": "Se connecter",
+      "cloudSaved": "Enregistré sur le compte",
+      "guestSaved": "Invité — enregistré dans ce navigateur",
+      "localSaved": "Enregistré localement",
+      "savingLocal": "Enregistrement local…",
+      "saving": "Enregistrement…",
+      "notSaved": "Non enregistré"
+    },
+    "themes": {
+      "royal": {
+        "name": "Décret royal",
+        "family": "Médiéval",
+        "label": "PAR ORDRE DE LA COURONNE"
+      },
+      "arcane": {
+        "name": "Grimoire arcanique",
+        "family": "Fantasy",
+        "label": "LA TROISIÈME CONJURATION"
+      },
+      "datapad": {
+        "name": "Datapad orbital",
+        "family": "Science-fiction",
+        "label": "TRANSMISSION // 08.41"
+      },
+      "dossier": {
+        "name": "Dossier de terrain",
+        "family": "Moderne",
+        "label": "CONFIDENTIEL // DOSSIER 47"
+      }
+    }
+  }
+}

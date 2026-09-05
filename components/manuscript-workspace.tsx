@@ -2,8 +2,8 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { Link, useRouter } from '@/i18n/navigation';
 import { saveManuscript } from '@/app/actions/manuscripts';
 import { toPng } from 'html-to-image';
 import {
@@ -18,7 +18,7 @@ import { WorkspaceToolbar } from '@/components/workspace-toolbar';
 import { LegalLinks } from '@/components/legal/legal-footer';
 import { triggerJsonDownload } from '@/lib/export';
 
-import { INITIAL, STORAGE_KEY, themes, validManuscript, type ThemeId, type Page, type Manuscript } from '@/lib/manuscript-data';
+import { STORAGE_KEY, themes, validManuscript, type ThemeId, type Page, type Manuscript } from '@/lib/manuscript-data';
 type InspectorTab = 'details' | 'style' | 'page';
 
 type WebMcpTool = {
@@ -41,12 +41,20 @@ function inlineMarkup(text: string) {
   });
 }
 
-export default function ManuscriptWorkspace({ initialManuscript = INITIAL, documentId, initialVersion = '' }: {
+export default function ManuscriptWorkspace({ initialManuscript, documentId, initialVersion = '' }: {
   initialManuscript?: Manuscript; documentId?: string; initialVersion?: string;
 }) {
+  const t = useTranslations('workspace');
+  const startingManuscript = initialManuscript ?? {
+    name: t('initial.name'), theme: 'royal' as const, activeId: 'page-1',
+    pages: [
+      { id: 'page-1', title: t('initial.page1Title'), body: t('initial.page1Body'), align: 'left' as const },
+      { id: 'page-2', title: t('initial.page2Title'), body: t('initial.page2Body'), align: 'left' as const },
+    ],
+  };
   const router = useRouter();
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
-  const [manuscript, setManuscript] = useState<Manuscript>(initialManuscript);
+  const [manuscript, setManuscript] = useState<Manuscript>(startingManuscript);
   const [saved, setSaved] = useState(true);
   const [hydrated, setHydrated] = useState(Boolean(documentId));
   const [saving, setSaving] = useState(false);
@@ -94,7 +102,7 @@ export default function ManuscriptWorkspace({ initialManuscript = INITIAL, docum
     const timer = window.setTimeout(() => {
       if (!documentId) {
         try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(manuscript)); setSaved(true); }
-        catch { setSaveError('Browser storage is full or unavailable. Download a JSON backup to keep your edits.'); }
+        catch { setSaveError(t('save.localFailure')); }
         return;
       }
       setSaving(true);
@@ -104,11 +112,11 @@ export default function ManuscriptWorkspace({ initialManuscript = INITIAL, docum
           version.current = result.version;
           if (latestDraft.current === manuscript) setSaved(true);
         }
-      }).catch(() => setSaveError('Could not save to your account. Retry or download a JSON backup.'))
+      }).catch(() => setSaveError(t('save.cloudFailure')))
         .finally(() => setSaving(false));
     }, 600);
     return () => window.clearTimeout(timer);
-  }, [hydrated, manuscript, saved, saving, saveError, documentId]);
+  }, [hydrated, manuscript, saved, saving, saveError, documentId, t]);
 
   useEffect(() => {
     if (saved) return;
@@ -170,7 +178,7 @@ export default function ManuscriptWorkspace({ initialManuscript = INITIAL, docum
 
   function addPage() {
     const id = crypto.randomUUID();
-    commit((current) => ({ ...current, activeId: id, pages: [...current.pages, { id, title: 'Untitled page', body: 'Begin writing here…', align: 'left' }] }));
+    commit((current) => ({ ...current, activeId: id, pages: [...current.pages, { id, title: t('initial.untitled'), body: t('initial.begin'), align: 'left' }] }));
     setPagesOpen(true); setInspectorOpen(true); setInspectorTab('details');
   }
 
@@ -187,7 +195,7 @@ export default function ManuscriptWorkspace({ initialManuscript = INITIAL, docum
     const field = bodyRef.current;
     if (!field) return;
     const start = field.selectionStart; const end = field.selectionEnd;
-    const selected = active.body.slice(start, end) || (mark === '**' ? 'bold text' : 'italic text');
+    const selected = active.body.slice(start, end) || (mark === '**' ? t('inspector.boldText') : t('inspector.italicText'));
     const body = `${active.body.slice(0, start)}${mark}${selected}${mark}${active.body.slice(end)}`;
     updateActive({ body });
     requestAnimationFrame(() => { field.focus(); field.setSelectionRange(start + mark.length, start + mark.length + selected.length); });
@@ -196,7 +204,7 @@ export default function ManuscriptWorkspace({ initialManuscript = INITIAL, docum
   function chooseImage(file?: File) {
     if (!file) return;
     if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type) || file.size > 700_000) {
-      window.alert('Choose a PNG, JPEG, WebP or GIF illustration under 700 KB.');
+      window.alert(t('image.invalid'));
       return;
     }
     const reader = new FileReader();
@@ -224,7 +232,7 @@ export default function ManuscriptWorkspace({ initialManuscript = INITIAL, docum
       link.click();
     } catch (error) {
       console.error('PNG export failed:', error);
-      window.alert('The PNG could not be generated. Please try again.');
+      window.alert(t('image.exportFailed'));
     } finally {
       setExporting(false);
     }
@@ -244,7 +252,7 @@ export default function ManuscriptWorkspace({ initialManuscript = INITIAL, docum
       setPagesOpen(true);
     } catch (error) {
       console.error('JSON import failed:', error);
-      window.alert('This JSON file is not a valid manuscript.');
+      window.alert(t('json.invalid'));
     }
   }
 
@@ -294,9 +302,9 @@ export default function ManuscriptWorkspace({ initialManuscript = INITIAL, docum
       event.stopPropagation();
       setPendingNavigation(link.pathname + link.search + link.hash);
     }}>
-      <h1 className="sr-only">Manuscript Builder — free TTRPG handout creator</h1>
-      <p className="sr-only">Create illustrated letters, royal decrees, grimoires, dossiers and sci-fi datapads for tabletop roleplaying games. Edit multiple pages, save locally, and export PNG images or editable JSON backups. No account required.</p>
-      <section className="canvas-area" aria-label="Manuscript workspace">
+      <h1 className="sr-only">{t('srHeading')}</h1>
+      <p className="sr-only">{t('srBody')}</p>
+      <section className="canvas-area" aria-label={t('aria.workspace')}>
         <div className="workspace-header">
           <WorkspaceToolbar
             pagesOpen={pagesOpen}
@@ -314,17 +322,17 @@ export default function ManuscriptWorkspace({ initialManuscript = INITIAL, docum
               <button
                 type="button"
                 className="workspace-settings flex items-center gap-1.5 rounded px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
-                title="Settings"
-                aria-label="Settings"
+                title={t('toolbar.settings')}
+                aria-label={t('toolbar.settings')}
                 onClick={() => { setInspectorOpen(true); setInspectorTab('style'); }}
               >
-                <Settings className="h-3.5 w-3.5" /><span>Settings</span>
+                <Settings className="h-3.5 w-3.5" /><span>{t('toolbar.settings')}</span>
               </button>
             )}
           />
 
           <div className="identity-chip floating-chrome">
-            <Link href={documentId ? '/dashboard' : '/'} aria-label={documentId ? 'Back to your manuscripts' : 'Back to home'} title={saved ? 'Back' : 'Waiting for your edits to save'} aria-disabled={!saved} onClick={event => { if (!saved) event.preventDefault(); }} className="text-zinc-400 hover:text-zinc-100">←</Link>
+            <Link href={documentId ? '/dashboard' : '/'} aria-label={documentId ? t('navigation.manuscripts') : t('navigation.home')} title={saved ? t('navigation.back') : t('navigation.waiting')} aria-disabled={!saved} onClick={event => { if (!saved) event.preventDefault(); }} className="text-zinc-400 hover:text-zinc-100">←</Link>
             <span className="manuscript-mark" aria-hidden="true"><Sparkles /></span>
             <span className="identity-name" title={manuscript.name}>{manuscript.name}</span>
             <span className="identity-stats">{manuscript.pages.length} · A4</span>
@@ -335,20 +343,20 @@ export default function ManuscriptWorkspace({ initialManuscript = INITIAL, docum
           </div>
         </div>
 
-        {saveError && <div role="alert" className="absolute bottom-4 left-1/2 z-40 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-lg border border-destructive/40 bg-zinc-900 px-4 py-3 text-sm text-zinc-200"><p className="max-w-lg">{saveError}</p><button className="mt-2 underline underline-offset-2" onClick={() => setSaveError(null)}>Retry save</button><button className="ml-4 underline underline-offset-2" onClick={downloadJson}>Download JSON</button></div>}
+        {saveError && <div role="alert" className="absolute bottom-4 left-1/2 z-40 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-lg border border-destructive/40 bg-zinc-900 px-4 py-3 text-sm text-zinc-200"><p className="max-w-lg">{saveError}</p><button className="mt-2 underline underline-offset-2" onClick={() => setSaveError(null)}>{t('save.retry')}</button><button className="ml-4 underline underline-offset-2" onClick={downloadJson}>{t('save.download')}</button></div>}
 
         {pagesOpen && (
-          <aside className="pages-panel floating-panel" aria-label="Manuscript pages">
-            <header><div><strong>Pages</strong><span>{manuscript.pages.length} in manuscript</span></div><button onClick={() => setPagesOpen(false)} aria-label="Close pages"><X /></button></header>
+          <aside className="pages-panel floating-panel" aria-label={t('aria.pages')}>
+            <header><div><strong>{t('pages.heading')}</strong><span>{t('pages.count',{count:manuscript.pages.length})}</span></div><button onClick={() => setPagesOpen(false)} aria-label={t('pages.close')}><X /></button></header>
             <div className="page-list">
               {manuscript.pages.map((page, index) => (
-                <button aria-label={`Open page ${index + 1}: ${page.title}`} key={page.id} className={`page-item ${page.id === active.id ? 'active' : ''}`} onClick={() => setManuscript((current) => ({ ...current, activeId: page.id }))}>
+                <button aria-label={t('pages.open',{number:index+1,title:page.title})} key={page.id} className={`page-item ${page.id === active.id ? 'active' : ''}`} onClick={() => setManuscript((current) => ({ ...current, activeId: page.id }))}>
                   <span className={`page-thumbnail theme-${manuscript.theme}`}><i /><b /><b /><b /></span>
                   <span className="page-caption"><strong>{String(index + 1).padStart(2, '0')}</strong><span>{page.title}</span></span>
                 </button>
               ))}
             </div>
-            <footer><Button className="primary-panel-button" onClick={addPage}><FilePlus2 /> Add page</Button></footer>
+            <footer><Button className="primary-panel-button" onClick={addPage}><FilePlus2 /> {t('pages.add')}</Button></footer>
           </aside>
         )}
 
@@ -360,82 +368,82 @@ export default function ManuscriptWorkspace({ initialManuscript = INITIAL, docum
           >
             <div className="paper-noise" />
             <div className="ornament ornament-top"><span>✦</span></div>
-            <p className="manuscript-kicker">{themes[manuscript.theme].label}</p>
+            <p className="manuscript-kicker">{t(`themes.${manuscript.theme}.label`)}</p>
             <h2>{active.title}</h2>
             <div className="title-rule"><span /></div>
-            {active.image && <Image unoptimized width={404} height={210} className="manuscript-image" src={active.image} alt="Uploaded manuscript illustration" />}
+            {active.image && <Image unoptimized width={404} height={210} className="manuscript-image" src={active.image} alt={t('image.uploadedAlt')} />}
             <div className="manuscript-body" style={{ textAlign: active.align }}>
               {active.body.split('\n').map((line, index) => line ? <p key={index}>{inlineMarkup(line)}</p> : <div className="paragraph-gap" key={index} />)}
             </div>
-            <div className="seal" aria-label="Seal decoration"><span>BM</span></div>
-            <p className="signature">By my hand and seal</p>
+            <div className="seal" aria-label={t('document.seal')}><span>BM</span></div>
+            <p className="signature">{t('document.signature')}</p>
             <div className="ornament ornament-bottom"><span>✦</span></div>
             <span className="folio">{activeIndex + 1}</span>
           </article>
         </div>
 
-        <div className="zoom-stack floating-chrome" aria-label="Zoom controls">
-          <ToolButton label="Zoom in" onClick={() => setZoom((value) => Math.min(120, value + 8))}><Plus /></ToolButton>
-          <ToolButton label="Zoom out" onClick={() => setZoom((value) => Math.max(45, value - 8))}><Minus /></ToolButton>
-          <ToolButton label="Reset zoom" onClick={() => setZoom(100)}><Square /></ToolButton>
+        <div className="zoom-stack floating-chrome" aria-label={t('aria.zoom')}>
+          <ToolButton label={t('zoom.in')} onClick={() => setZoom((value) => Math.min(120, value + 8))}><Plus /></ToolButton>
+          <ToolButton label={t('zoom.out')} onClick={() => setZoom((value) => Math.max(45, value - 8))}><Minus /></ToolButton>
+          <ToolButton label={t('zoom.reset')} onClick={() => setZoom(100)}><Square /></ToolButton>
         </div>
 
-        {!inspectorOpen && <button className="open-inspector floating-chrome" onClick={() => setInspectorOpen(true)}>Edit page</button>}
+        {!inspectorOpen && <button className="open-inspector floating-chrome" onClick={() => setInspectorOpen(true)}>{t('inspector.open')}</button>}
 
         {inspectorOpen && (
-          <aside className="inspector floating-panel" aria-label="Page inspector">
-            <header><div><strong>{active.title || 'Untitled page'}</strong><span>Page {activeIndex + 1}</span></div><button onClick={() => setInspectorOpen(false)} aria-label="Close inspector"><X /></button></header>
+          <aside className="inspector floating-panel" aria-label={t('aria.inspector')}>
+            <header><div><strong>{active.title || t('initial.untitled')}</strong><span>{t('inspector.page',{number:activeIndex+1})}</span></div><button onClick={() => setInspectorOpen(false)} aria-label={t('inspector.close')}><X /></button></header>
             <Tabs value={inspectorTab} onValueChange={(value) => setInspectorTab(value as InspectorTab)} className="inspector-tabs-root">
               <TabsList variant="line" className="inspector-tabs">
-                <TabsTrigger value="details">Details</TabsTrigger><TabsTrigger value="style">Style</TabsTrigger><TabsTrigger value="page">Page</TabsTrigger>
+                <TabsTrigger value="details">{t('inspector.tabs.details')}</TabsTrigger><TabsTrigger value="style">{t('inspector.tabs.style')}</TabsTrigger><TabsTrigger value="page">{t('inspector.tabs.page')}</TabsTrigger>
               </TabsList>
               <form className="inspector-form" onSubmit={(event) => event.preventDefault()}>
                 <TabsContent value="details" className="inspector-content">
-                  <Field label="Title"><input value={active.title} maxLength={120} onChange={(event) => updateActive({ title: event.target.value })} /></Field>
-                  <Field label="Body">
+                  <Field label={t('inspector.title')}><input value={active.title} maxLength={120} onChange={(event) => updateActive({ title: event.target.value })} /></Field>
+                  <Field label={t('inspector.body')}>
                     <div className="format-row">
-                      <button type="button" onClick={() => wrapSelection('**')} title="Bold selected text"><strong>B</strong></button>
-                      <button type="button" onClick={() => wrapSelection('*')} title="Italic selected text"><Italic /></button>
+                      <button type="button" onClick={() => wrapSelection('**')} title={t('inspector.bold')}><strong>B</strong></button>
+                      <button type="button" onClick={() => wrapSelection('*')} title={t('inspector.italic')}><Italic /></button>
                       <span />
-                      <button type="button" className={active.align === 'left' ? 'active' : ''} onClick={() => updateActive({ align: 'left' })} title="Align left"><AlignLeft /></button>
-                      <button type="button" className={active.align === 'center' ? 'active' : ''} onClick={() => updateActive({ align: 'center' })} title="Align center"><AlignCenter /></button>
-                      <button type="button" className={active.align === 'right' ? 'active' : ''} onClick={() => updateActive({ align: 'right' })} title="Align right"><AlignRight /></button>
+                      <button type="button" className={active.align === 'left' ? 'active' : ''} onClick={() => updateActive({ align: 'left' })} title={t('inspector.alignLeft')}><AlignLeft /></button>
+                      <button type="button" className={active.align === 'center' ? 'active' : ''} onClick={() => updateActive({ align: 'center' })} title={t('inspector.alignCenter')}><AlignCenter /></button>
+                      <button type="button" className={active.align === 'right' ? 'active' : ''} onClick={() => updateActive({ align: 'right' })} title={t('inspector.alignRight')}><AlignRight /></button>
                     </div>
                     <textarea ref={bodyRef} value={active.body} maxLength={12000} onChange={(event) => updateActive({ body: event.target.value })} rows={10} />
-                    <small>{active.body.length} characters</small>
+                    <small>{t('inspector.characters',{count:active.body.length})}</small>
                   </Field>
-                  <Field label="Illustration">
+                  <Field label={t('image.label')}>
                     {active.image ? (
-                      <div className="image-control"><Image unoptimized width={258} height={110} src={active.image} alt="Current manuscript illustration" /><button type="button" onClick={() => updateActive({ image: undefined })}><Trash2 /> Remove</button></div>
+                      <div className="image-control"><Image unoptimized width={258} height={110} src={active.image} alt={t('image.currentAlt')} /><button type="button" onClick={() => updateActive({ image: undefined })}><Trash2 /> {t('image.remove')}</button></div>
                     ) : (
-                      <button type="button" className="upload-button" onClick={() => imageInputRef.current?.click()}><ImagePlus /> Add an image</button>
+                      <button type="button" className="upload-button" onClick={() => imageInputRef.current?.click()}><ImagePlus /> {t('image.add')}</button>
                     )}
                   </Field>
                 </TabsContent>
                 <TabsContent value="style" className="inspector-content">
-                  <Field label="Manuscript style">
+                  <Field label={t('inspector.style')}>
                     <Select value={manuscript.theme} onValueChange={(value) => commit((current) => ({ ...current, theme: value as ThemeId }))}>
                       <SelectTrigger className="theme-select"><SelectValue /></SelectTrigger>
-                      <SelectContent>{Object.entries(themes).map(([id, item]) => <SelectItem key={id} value={id}>{item.name}</SelectItem>)}</SelectContent>
+                      <SelectContent>{Object.keys(themes).map((id) => <SelectItem key={id} value={id}>{t(`themes.${id as ThemeId}.name`)}</SelectItem>)}</SelectContent>
                     </Select>
                   </Field>
                   <div className="theme-cards">
-                    {(Object.entries(themes) as [ThemeId, (typeof themes)[ThemeId]][]).map(([id, item]) => (
-                      <button type="button" aria-label={`Use ${item.name} style`} key={id} className={manuscript.theme === id ? 'selected' : ''} onClick={() => commit((current) => ({ ...current, theme: id }))}>
-                        <span className={`theme-swatch theme-${id}`} /><span><strong>{item.name}</strong><small>{item.family}</small></span>
+                    {(Object.entries(themes) as [ThemeId, (typeof themes)[ThemeId]][]).map(([id]) => (
+                      <button type="button" aria-label={t('inspector.useStyle',{style:t(`themes.${id}.name`)})} key={id} className={manuscript.theme === id ? 'selected' : ''} onClick={() => commit((current) => ({ ...current, theme: id }))}>
+                        <span className={`theme-swatch theme-${id}`} /><span><strong>{t(`themes.${id}.name`)}</strong><small>{t(`themes.${id}.family`)}</small></span>
                       </button>
                     ))}
                   </div>
                   <div className="mt-6 border-t border-zinc-800 pt-4">
-                    <p className="mb-3 text-xs font-medium text-zinc-400">About Manuscript Builder</p>
+                    <p className="mb-3 text-xs font-medium text-zinc-400">{t('inspector.about')}</p>
                     <LegalLinks />
                   </div>
                 </TabsContent>
                 <TabsContent value="page" className="inspector-content">
-                  <Field label="Manuscript name"><input value={manuscript.name} maxLength={80} onChange={(event) => commit((current) => ({ ...current, name: event.target.value }))} /></Field>
-                  <Field label="Format"><div className="property-row"><span>Page size</span><strong>A4 portrait</strong></div><div className="property-row"><span>Numbering</span><strong>Visible</strong></div></Field>
+                  <Field label={t('inspector.name')}><input value={manuscript.name} maxLength={80} onChange={(event) => commit((current) => ({ ...current, name: event.target.value }))} /></Field>
+                  <Field label={t('inspector.format')}><div className="property-row"><span>{t('inspector.pageSize')}</span><strong>{t('inspector.portrait')}</strong></div><div className="property-row"><span>{t('inspector.numbering')}</span><strong>{t('inspector.visible')}</strong></div></Field>
                 </TabsContent>
-                <footer><button type="button" className="saved-button" disabled><Check /> {saveError ? 'Not saved' : saved ? 'Saved' : 'Saving…'}</button><button type="button" className="trash-button" disabled={manuscript.pages.length === 1} onClick={deletePage} aria-label="Delete page"><Trash2 /></button></footer>
+                <footer><button type="button" className="saved-button" disabled><Check /> {saveError ? t('save.notSaved') : saved ? t('save.saved') : t('save.saving')}</button><button type="button" className="trash-button" disabled={manuscript.pages.length === 1} onClick={deletePage} aria-label={t('inspector.delete')}><Trash2 /></button></footer>
               </form>
             </Tabs>
           </aside>

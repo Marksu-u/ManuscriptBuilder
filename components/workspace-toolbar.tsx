@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   ChevronDown,
   Download,
@@ -40,6 +41,7 @@ export function WorkspaceToolbar({
   exporting = false,
   extra,
 }: WorkspaceToolbarProps) {
+  const t = useTranslations('workspace.toolbar');
   const [exportOpen, setExportOpen] = useState(false);
   const exportRef = useRef<HTMLDivElement>(null);
 
@@ -65,13 +67,13 @@ export function WorkspaceToolbar({
   }, [exportOpen]);
 
   return (
-    <nav aria-label="Manuscript tools" className="workspace-toolbar flex items-center gap-0.5 rounded-lg border border-zinc-700 bg-zinc-900/95 p-1 shadow-lg backdrop-blur-sm">
+    <nav aria-label={t('aria')} className="workspace-toolbar flex items-center gap-0.5 rounded-lg border border-zinc-700 bg-zinc-900/95 p-1 shadow-lg backdrop-blur-sm">
       <button
         type="button"
         onClick={onFitView}
         className="cursor-pointer rounded p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
-        title="Fit page"
-        aria-label="Fit page"
+        title={t('fit')}
+        aria-label={t('fit')}
       >
         <Maximize2 size={14} />
       </button>
@@ -85,8 +87,8 @@ export function WorkspaceToolbar({
             ? 'bg-zinc-800 text-zinc-200'
             : 'text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300',
         ].join(' ')}
-        title="Pages"
-        aria-label="Pages"
+        title={t('pages')}
+        aria-label={t('pages')}
         aria-pressed={pagesOpen}
       >
         <Files size={14} />
@@ -99,8 +101,8 @@ export function WorkspaceToolbar({
         onClick={onUndo}
         disabled={!canUndo}
         className="cursor-pointer rounded p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200 disabled:cursor-not-allowed disabled:opacity-30"
-        title="Undo"
-        aria-label="Undo"
+        title={t('undo')}
+        aria-label={t('undo')}
       >
         <Undo2 size={14} />
       </button>
@@ -110,8 +112,8 @@ export function WorkspaceToolbar({
         onClick={onRedo}
         disabled={!canRedo}
         className="cursor-pointer rounded p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200 disabled:cursor-not-allowed disabled:opacity-30"
-        title="Redo"
-        aria-label="Redo"
+        title={t('redo')}
+        aria-label={t('redo')}
       >
         <Redo2 size={14} />
       </button>
@@ -123,8 +125,8 @@ export function WorkspaceToolbar({
           type="button"
           onClick={() => setExportOpen((open) => !open)}
           className="flex items-center gap-1 rounded p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200 disabled:cursor-wait disabled:opacity-50"
-          title="Export"
-          aria-label="Export"
+          title={t('export')}
+          aria-label={t('export')}
           aria-expanded={exportOpen}
           disabled={exporting}
         >
@@ -139,14 +141,14 @@ export function WorkspaceToolbar({
               onClick={() => { setExportOpen(false); onExportPng(); }}
               className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-zinc-300 hover:bg-zinc-800"
             >
-              Export PNG
+              {t('png')}
             </button>
             <button
               type="button"
               onClick={() => { setExportOpen(false); onExportJson(); }}
               className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-zinc-300 hover:bg-zinc-800"
             >
-              Download JSON
+              {t('json')}
             </button>
             <div className="my-1 h-px bg-zinc-700" />
             <button
@@ -155,7 +157,7 @@ export function WorkspaceToolbar({
               className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-zinc-300 hover:bg-zinc-800"
             >
               <Upload size={12} />
-              Import JSON
+              {t('import')}
             </button>
           </div>
         )}

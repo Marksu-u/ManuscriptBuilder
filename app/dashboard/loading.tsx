@@ -1,1 +1,0 @@
-export default function DashboardLoading(){return <main aria-label="Loading manuscripts" className="mx-auto max-w-5xl px-6 py-24"><p role="status" className="text-sm text-zinc-400">Loading your manuscripts…</p></main>;}

@@ -1,41 +1,57 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
-import { FramedHeader } from "@/components/shell/framed-header";
-import { LegalFooter } from "@/components/legal/legal-footer";
-import { CONTACT_EMAIL, LEGAL_UPDATED } from "@/lib/legal";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import { Footer } from "@/components/legal/legal-footer";
+import { LanguageSwitcher } from "./language-switcher";
 
-export function LegalDoc({ title, children }: { title: string; children: ReactNode }) {
+export async function LegalDoc({ title, updated, children }: { title: string; updated: string; children: ReactNode }) {
+  const t = await getTranslations("legalPages");
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <FramedHeader maxWidth="max-w-2xl" />
-      <main className="flex-1 px-6 py-12 text-sm leading-relaxed text-zinc-400 sm:py-16">
-        <div className="mx-auto max-w-2xl">
-          <h1 className="mb-2 text-2xl font-semibold tracking-tight text-zinc-100">{title}</h1>
-          <p className="mb-8 text-xs text-zinc-500">Last updated: <time dateTime={LEGAL_UPDATED.dateTime}>{LEGAL_UPDATED.label}</time></p>
-          <div className="space-y-7">{children}</div>
-          <Link href="/" className="mt-12 inline-block text-xs text-zinc-500 underline underline-offset-2 hover:text-zinc-300">
-            ← Back to Manuscript Builder
-          </Link>
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto max-w-2xl px-4 py-16 text-sm text-zinc-300">
+        <div className="mb-6 flex items-center justify-between gap-4"><LanguageSwitcher /></div>
+        <h1 className="mb-2 text-2xl font-bold text-zinc-100">{title}</h1>
+        <p className="mb-8 text-zinc-500">{t("updated", { date: updated })}</p>
+        <section className="space-y-6">{children}</section>
+        <div className="mt-12">
+          <Link href="/" className="text-xs text-zinc-500 underline hover:text-zinc-300">{t("back")}</Link>
         </div>
-      </main>
-      <LegalFooter />
-    </div>
+      </div>
+      <Footer currentTool="Manuscript Builder" />
+    </main>
   );
 }
 
 export function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section>
+    <div>
       <h2 className="mb-2 font-semibold text-zinc-100">{title}</h2>
-      <div className="space-y-3">{children}</div>
-    </section>
+      <div className="space-y-2">{children}</div>
+    </div>
   );
 }
 
-export function LegalLink({ href, children }: { href: string; children: ReactNode }) {
-  return <Link href={href} className="break-words text-zinc-300 underline underline-offset-2 hover:text-zinc-100">{children}</Link>;
+export function Bullets({ items }: { items: ReactNode[] }) {
+  return <ul className="mt-2 list-inside list-disc space-y-1 text-zinc-400">{items.map((item, index) => <li key={index}>{item}</li>)}</ul>;
 }
 
-export function Contact() {
-  return <LegalLink href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</LegalLink>;
+export const legalTags = {
+  b: (chunks: ReactNode) => <strong className="text-zinc-300">{chunks}</strong>,
+  code: (chunks: ReactNode) => <code className="text-zinc-300">{chunks}</code>,
+  stream: (chunks: ReactNode) => <>&lt;{chunks}&gt;</>,
+};
+
+export function extLink(href: string) {
+  // eslint-disable-next-line react/display-name -- next-intl rich-text renderer
+  return (chunks: ReactNode) => <a href={href} className="underline hover:text-zinc-100" target="_blank" rel="noopener noreferrer">{chunks}</a>;
+}
+
+export function intLink(href: string) {
+  // eslint-disable-next-line react/display-name -- next-intl rich-text renderer
+  return (chunks: ReactNode) => <Link href={href} className="underline hover:text-zinc-100">{chunks}</Link>;
+}
+
+export function mailLink(address: string) {
+  // eslint-disable-next-line react/display-name -- next-intl rich-text renderer
+  return (chunks: ReactNode) => <a href={`mailto:${address}`} className="underline hover:text-zinc-100">{chunks}</a>;
 }

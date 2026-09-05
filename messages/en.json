@@ -1,0 +1,615 @@
+{
+  "site": {
+    "name": "Manuscript Builder",
+    "description": "Create TTRPG handouts, letters, grimoires and sci-fi datapads. Style illustrated manuscripts in your browser and export PNG or JSON. Free, no account required.",
+    "jsonLdDescription": "A free TTRPG handout editor for creating illustrated letters, royal decrees, grimoires, dossiers and sci-fi datapads in your browser.",
+    "orgDescription": "Free web tools for tabletop games.",
+    "ogAlt": "Manuscript Builder — parchment letters and sci-fi handouts for your tabletop worlds"
+  },
+  "consent": {
+    "label": "Audience measurement",
+    "body": "We would like to measure site traffic with Google Analytics, which places cookies on your device. Everything works exactly the same if you decline.",
+    "policy": "Cookie Policy",
+    "accept": "Accept",
+    "decline": "Decline",
+    "prefs": {
+      "granted": "You have accepted audience measurement.",
+      "denied": "You have declined audience measurement. No Google Analytics cookies are set.",
+      "unanswered": "You have not answered yet. Audience measurement is off.",
+      "note": "You can change your mind at any time; declining after having accepted deletes the cookies immediately. Your choice is kept for six months on this device, after which you are asked again.",
+      "pending": "Loading…"
+    }
+  },
+  "footer": {
+    "partOf": "is part of",
+    "tagline": "free tools, forever.",
+    "moreTools": "More tools",
+    "legal": "Legal Notice",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "cookies": "Cookies",
+    "twitter": "X",
+    "source": "Source on GitHub"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "fr": "Français"
+  },
+  "legalPages": {
+    "back": "← Back to Manuscript Builder",
+    "updated": "Last updated: {date}",
+    "cookies": {
+      "title": "Cookie Policy",
+      "metaTitle": "Cookie Policy · Bag Of Holding Tools",
+      "updated": "August 2026",
+      "s1": {
+        "heading": "1. What is a cookie?",
+        "p1": "A cookie is a small file placed on your browser when you visit a site. This page explains which cookies and storage technologies are used by Bag Of Holding Tools and its tools, including Manuscript Builder (the \"Site\").",
+        "p2": "The Site uses <b>no advertising, social-media or personalization cookies</b>. Your activity is never sold or used for commercial purposes. Only <b>audience measurement</b>, described in section 4, may be switched on — and only if you explicitly accept it."
+      },
+      "s2": {
+        "heading": "2. Strictly necessary cookies",
+        "p1": "These cookies are strictly necessary for the Site to function. Under the applicable rules, they do not require your consent.",
+        "item1": "<b>Supabase session cookie</b> (e.g. <code>sb-…-auth-token</code>) — keeps you signed in to your account. Only set if you create an account and sign in. Duration: until you sign out or the session expires."
+      },
+      "s3": {
+        "heading": "3. Local storage (guest mode)",
+        "p1": "In guest mode (no account), the Site uses your browser's local storage (<code>localStorage</code>) to save your work on your own device. This data is never sent to our servers and is deleted when you clear your browser storage. This mechanism is strictly necessary and does not require your consent.",
+        "p2": "Your answer to the consent request described in section 4 is kept there too (key <code>boh-analytics-consent</code>), so that you are not asked again on every visit. That record is strictly necessary as well: without it, a refusal could not be honoured."
+      },
+      "s4": {
+        "heading": "4. Audience measurement (subject to your consent)",
+        "p1": "With your prior agreement, the Site uses <b>Google Analytics 4</b> to measure traffic: number of visits, pages viewed, approximate origin and device type. We use it only to learn which tools are worth building on.",
+        "item1": "<code>_ga</code> and <code>_ga_<stream>stream id</stream></code> — distinguish visitors and sessions. Duration: 13 months at most.",
+        "p2": "<b>Nothing is set until you accept.</b> If you decline, or simply do not answer, no audience-measurement cookie is created and no data is sent to Google. The Site works exactly the same either way: no feature is conditional on your acceptance.",
+        "p3": "The content you create — manuscripts, pages, text, notes and illustrations — is never sent to Google. Google acts as a processor; data may be transferred to the United States under the conditions described in section 9 of the Privacy Policy."
+      },
+      "s5": {
+        "heading": "5. Cookies not used",
+        "p1": "For transparency, the following categories are <b>never</b> used by the Site:",
+        "items": [
+          "Advertising cookies — none",
+          "Social-media cookies — none",
+          "Content personalization cookies — none",
+          "Selling or sharing your data for commercial purposes — none"
+        ]
+      },
+      "s6": {
+        "heading": "6. Managing your browser",
+        "p1": "You can configure your browser at any time to block or delete cookies. Note: without the session cookie, you will not be able to stay signed in to your account. To learn more, see the CNIL website: <cnil>cnil.fr</cnil>.",
+        "cnilUrl": "https://www.cnil.fr/en/cookies-and-other-tracking-devices"
+      }
+    },
+    "terms": {
+      "title": "Terms of Use",
+      "metaTitle": "Terms of Use · Bag Of Holding Tools",
+      "updated": "August 2026",
+      "s1": {
+        "heading": "1. Purpose",
+        "p1": "These terms of use (\"Terms\") govern access to and use of all tools published under Bag Of Holding Tools by an individual acting on a personal and non-commercial basis, publishing under the pseudonym {alias} in accordance with article 6-III-2 of the French LCEN (\"We\"), including Manuscript Builder (together, the \"Tools\"). Each Tool is free, with or without an account, and involves no payment."
+      },
+      "s2": {
+        "heading": "2. Acceptance",
+        "p1": "By using a Tool, you fully and unreservedly accept these Terms. If you do not accept them, you must not use the Tools."
+      },
+      "s3": {
+        "heading": "3. Legal capacity",
+        "p1": "The Tools are accessible to anyone with the legal capacity to be bound by these Terms. A minor may only use them with the consent of their legal guardian."
+      },
+      "s4": {
+        "heading": "4. Account",
+        "p1": "Creating an account is optional and only exists to save your work to the cloud and access it from multiple devices. One account works across all Tools. You are responsible for keeping your account secure and agree not to let a third party use it on your behalf."
+      },
+      "s5": {
+        "heading": "5. Availability and no warranty",
+        "p1": "The Tools are provided \"as is\", with no guarantee of availability, accuracy or fitness for a particular purpose. We do not warrant that the Tools will be free of defects or operate without interruption, and we may suspend access for maintenance or updates."
+      },
+      "s6": {
+        "heading": "6. Your content",
+        "p1": "You retain full ownership of the data you create in a Tool. If you make content public or share an exported file, you control its recipients and remain responsible for that distribution."
+      },
+      "s7": {
+        "heading": "7. Data about other people",
+        "p1": "Some Tools let you enter information about other real people. You are solely responsible for having the right to enter that information and for how you use it. You must not enter data about someone you are not entitled to share. If a complaint is made about content concerning a real person, we may remove or restrict access to it without prior notice, and you agree to indemnify us against any claim arising from data you entered about others."
+      },
+      "s8": {
+        "heading": "8. Prohibited conduct",
+        "p1": "The following is prohibited, among other things:",
+        "items": [
+          "creating or sharing content that is illegal, harmful, defamatory, hateful, promotes violence, or infringes the rights of others;",
+          "disrupting, slowing down or attempting to intrude into the systems or infrastructure of the Tools;",
+          "circumventing security or authentication measures;",
+          "reselling, monetizing or licensing access to the Tools."
+        ]
+      },
+      "s9": {
+        "heading": "9. Reporting and moderation",
+        "p1": "Public content is accessible to anyone with the link. Reports are reviewed and may lead to content being made private or removed without prior notice. To report content: <mail>{email}</mail>."
+      },
+      "s10": {
+        "heading": "10. Intellectual property",
+        "p1": "We remain the owner of the intellectual property rights in the Tools. These Terms transfer none of those rights to you, other than a personal, non-exclusive right to use them for the duration of your use."
+      },
+      "s11": {
+        "heading": "11. Liability",
+        "p1": "As the Tools are provided free of charge, and to the maximum extent permitted by law, we cannot be held liable for any damages arising from the use or inability to use a Tool, or from any content created, shared or accessed by users."
+      },
+      "s12": {
+        "heading": "12. Termination",
+        "p1": "You may delete your account at any time. We reserve the right to suspend access or remove any content, in any Tool, in the event of a breach of these Terms."
+      },
+      "s13": {
+        "heading": "13. Personal data",
+        "p1": "The processing of your personal data is described in our <privacy>Privacy Policy</privacy>."
+      },
+      "s14": {
+        "heading": "14. Changes",
+        "p1": "We may update these Terms as Tools are added or changed. Continued use after an update constitutes acceptance of the revised Terms."
+      },
+      "s15": {
+        "heading": "15. Language",
+        "p1": "These Terms are written in French and English. In the event of any conflict or dispute over the meaning of a term, the French version prevails."
+      },
+      "s16": {
+        "heading": "16. Governing law",
+        "p1": "These Terms are governed by French law. Any dispute not resolved amicably will fall under the exclusive jurisdiction of the French courts."
+      },
+      "s17": {
+        "heading": "17. Contact",
+        "p1": "Any question about these Terms: <mail>{email}</mail>."
+      }
+    },
+    "notice": {
+      "title": "Legal Notice",
+      "metaTitle": "Legal Notice · Bag Of Holding Tools",
+      "updated": "August 2026",
+      "publisher": {
+        "heading": "Site publisher",
+        "p1": "The Bag Of Holding Tools site and all of its tools, including Manuscript Builder (the \"Site\"), are published by an individual, on a personal and non-commercial basis (the \"Publisher\"). The Publisher's details have been provided to the host, in accordance with article 6-III-2 of the French LCEN.",
+        "p2": "The Publisher can be reached at <mail>{email}</mail>."
+      },
+      "director": {
+        "heading": "Publication director",
+        "p1": "The publication director is {alias}."
+      },
+      "host": {
+        "heading": "Hosting",
+        "p1": "The Site is hosted by {host}, {address} (<hostLink>vercel.com</hostLink>). The host can be contacted at <hostMail>{hostEmail}</hostMail>.",
+        "p2": "Account data is stored by {dataHost}, in a region located within the European Union (<dataLink>supabase.com</dataLink>)."
+      },
+      "ip": {
+        "heading": "Intellectual property",
+        "p1": "All trademarks, text, illustrations, images and software that make up the Site are protected under intellectual property law and are the property of the Publisher, except where otherwise stated. Any reproduction, representation or adaptation, in whole or in part, without the Publisher's prior written consent, is strictly prohibited.",
+        "p2": "The data you create within a tool (for example your manuscripts and illustrations) belongs to you and is not claimed by the Publisher."
+      },
+      "links": {
+        "heading": "Hyperlinks",
+        "p1": "The Site may contain links to other sites published and managed by third parties. The Publisher cannot be held liable, directly or indirectly, for the content of those third-party sites."
+      }
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "metaTitle": "Privacy Policy · Bag Of Holding Tools",
+      "updated": "August 2026",
+      "preamble": {
+        "heading": "Preamble",
+        "p1": "This policy applies to all tools published under Bag Of Holding Tools, including Manuscript Builder. All tools share the same account system, so one policy covers all of them. It explains how your personal data is collected, processed and retained, in accordance with French Law no. 78-17 of 6 January 1978 (\"Informatique et Libertés\") and Regulation (EU) 2016/679 (\"GDPR\")."
+      },
+      "s1": {
+        "heading": "1. Definition",
+        "p1": "\"Personal data\" means any information that can identify you directly or indirectly, such as your email address."
+      },
+      "s2": {
+        "heading": "2. Data controller",
+        "p1": "The data controller is the Site's publisher: an individual acting on a personal and non-commercial basis, publishing under the pseudonym {alias} in accordance with article 6-III-2 of the French LCEN (\"We\"). Their full details are held by the host.",
+        "p2": "The data controller can be reached at any time at <mail>{email}</mail>. That address is the single point of contact for every request concerning your data."
+      },
+      "s3": {
+        "heading": "3. Guest mode (no account)",
+        "p1": "You can use every tool without creating an account. In guest mode, your data (manuscripts, pages, text, formatting and illustrations) is stored only in your browser (localStorage) and is never sent to our servers. Exporting to PNG or JSON happens entirely on your device. We have no access to guest-mode data.",
+        "p2": "Guest mode is not exempt from the optional audience measurement described in section 5. That covers browsing only (pages viewed, device type), never the content you create, and it stays off until you have accepted it."
+      },
+      "s4": {
+        "heading": "4. Data collected and purposes (account mode)",
+        "p1": "Creating an account is optional and only exists to save your work to the cloud. When you sign in with Google, we collect:",
+        "items": [
+          "Your email address (provided by Google);",
+          "The data you create in each tool (e.g. manuscripts, pages, text, formatting and illustrations for Manuscript Builder)."
+        ],
+        "p2": "We do not collect your name, profile picture, or any other Google account data beyond your email address. The legal basis for this processing is the performance of the contract you enter into by creating an account. Your data is used solely to identify you and let you access your work across sessions and devices."
+      },
+      "s5": {
+        "heading": "5. Recipients and subprocessors",
+        "p1": "Your account data is processed by the following providers, solely to operate the service:",
+        "item1": "<b>Supabase</b> (EU region) — authentication and database hosting;",
+        "item2": "<b>Vercel</b> — application hosting;",
+        "item3": "<b>Google</b> — sign-in (OAuth) provider.",
+        "item4": "<b>Google Analytics</b> — audience measurement, <b>only if you have accepted it</b>. Nothing is sent to it before you agree, and your content is never sent to it at all. See the <cookies>Cookie Policy</cookies>.",
+        "p2": "Your data is never sold, rented, or shared with any third party beyond these providers."
+      },
+      "s6": {
+        "heading": "6. Data retention",
+        "p1": "Account data is retained for as long as your account exists. You may request deletion of your account and all associated data at any time by writing to <mail>{email}</mail>. Deletion is permanent."
+      },
+      "s7": {
+        "heading": "7. Security",
+        "p1": "We implement appropriate technical and organizational measures to preserve the security, integrity and confidentiality of your data and to prevent unauthorized third-party access."
+      },
+      "s8": {
+        "heading": "8. Hosting",
+        "p1": "Your account data is stored on Supabase servers, in a region located within the European Union."
+      },
+      "s9": {
+        "heading": "9. Transfers outside the European Union",
+        "p1": "Vercel and Google are based in the United States. Where your data is transferred outside the European Union, that transfer is covered either by an adequacy decision (including the EU–US Data Privacy Framework) or by the standard contractual clauses approved by the European Commission."
+      },
+      "s10": {
+        "heading": "10. Your rights",
+        "p1": "Under the GDPR, you have the following rights:",
+        "items": [
+          "Right of access, rectification and erasure of your data;",
+          "Right to restrict processing;",
+          "Right to data portability (receive your data in a machine-readable format);",
+          "Right to object to processing;",
+          "Right to withdraw your consent at any time;",
+          "Right to define directives on what happens to your data after your death."
+        ],
+        "p2": "You can exercise these rights by writing to <mail>{email}</mail>. We reply within one month of receiving your request."
+      },
+      "s11": {
+        "heading": "11. Complaint to a supervisory authority",
+        "p1": "You have the right to lodge a complaint with a supervisory authority — in France the <cnil>CNIL</cnil> — if you believe the processing of your data breaches applicable law.",
+        "cnilUrl": "https://www.cnil.fr"
+      },
+      "s12": {
+        "heading": "12. Data about third parties",
+        "p1": "Some tools let you enter information about other people. You are responsible for having the right to enter that information — see our <terms>Terms of Use</terms>. If a third party wants information about them removed from an account they do not control, they can contact us and we will forward the request to the account holder or act on it directly where required by law."
+      },
+      "s13": {
+        "heading": "13. Children",
+        "p1": "Our tools are not directed at children under 15. If you believe a child under 15 has created an account, contact us and we will delete it."
+      },
+      "s14": {
+        "heading": "14. Changes",
+        "p1": "We may update this policy as tools are added or changed. Changes take effect upon publication, reflected in the last-updated date above."
+      },
+      "s15": {
+        "heading": "15. Contact",
+        "p1": "Any question about this policy: <mail>{email}</mail>."
+      }
+    }
+  },
+  "notFound": {
+    "metaTitle": "Page not found",
+    "code": "404",
+    "heading": "This page has gone missing.",
+    "body": "The manuscript may have been moved, renamed, or never written.",
+    "canvas": "Open the editor",
+    "about": "About Manuscript Builder"
+  },
+  "login": {
+    "metaTitle": "Sign in",
+    "heading": "Sign in",
+    "subtitle": "Save manuscripts to your account and pick up where you left off on another device.",
+    "google": "Continue with Google",
+    "redirecting": "Redirecting…",
+    "legal": "By continuing, you agree to the <terms>Terms</terms> and acknowledge the <privacy>Privacy Policy</privacy>.",
+    "guest": "No account needed to use the tool.",
+    "guestLink": "Try it as a guest →",
+    "loading": "Loading sign-in",
+    "errors": {
+      "auth_callback_failed": "We couldn't complete your sign-in. Please try again.",
+      "sync_failed": "You're signed in, but we couldn't load your account. Please try again shortly.",
+      "generic": "Sign-in failed. Please try again.",
+      "unknown": "An error occurred"
+    }
+  },
+  "account": {
+    "metaTitle": "Account",
+    "description": "Manage your Manuscript Builder account and shared sign-in.",
+    "back": "← Your manuscripts",
+    "signOut": "Sign out",
+    "heading": "Account",
+    "email": "Email",
+    "saved": "Saved manuscripts",
+    "danger": {
+      "heading": "Danger zone",
+      "body": "Deleting your account permanently erases your shared sign-in and everything tied to it. This cannot be undone.",
+      "ecosystem": "One account covers every Bag Of Holding Tools app:"
+    },
+    "delete": {
+      "trigger": "Delete account",
+      "title": "Delete your account",
+      "body": "This permanently deletes your shared account and everything tied to it in every Bag Of Holding Tools app. This cannot be undone.",
+      "confirmLabel": "Type <b>{email}</b> to confirm",
+      "confirm": "Delete forever",
+      "deleting": "Deleting…"
+    }
+  },
+  "dashboard": {
+    "metaTitle": "Your manuscripts",
+    "description": "Open and manage your saved manuscripts.",
+    "heading": "Your manuscripts",
+    "signOut": "Sign out",
+    "count": "{count, plural, =0 {A place for the stories your players can hold.} one {# saved manuscript} other {# saved manuscripts}}",
+    "create": "New manuscript",
+    "card": {
+      "fallbackStyle": "Manuscript",
+      "pages": "{count, plural, one {# page} other {# pages}}",
+      "updated": "Updated {date}"
+    },
+    "empty": {
+      "title": "Your first manuscript starts here",
+      "description": "Create a letter, a grimoire or a secret transmission. Your account manuscripts will appear here when you return.",
+      "action": "Create a manuscript →"
+    },
+    "new": {
+      "metaTitle": "New manuscript",
+      "back": "← Your manuscripts",
+      "heading": "New manuscript",
+      "description": "Choose a name and a starting style. You can change both later.",
+      "name": "Name",
+      "namePlaceholder": "The Blackmere summons",
+      "style": "Style",
+      "create": "Create manuscript",
+      "creating": "Creating…",
+      "cancel": "Cancel"
+    },
+    "loading": "Loading your manuscripts…",
+    "error": {
+      "heading": "We couldn't load your manuscripts",
+      "body": "Your account data has not been changed. Please retry, or contact support@bagofholdingtools.com if the problem continues.",
+      "retry": "Try again",
+      "home": "Back to home"
+    },
+    "guestImport": {
+      "heading": "Bring your browser draft with you",
+      "body": "Import “{name}” into your account to open it on other devices. Your browser copy will be kept.",
+      "import": "Import browser draft",
+      "importing": "Importing…",
+      "dismiss": "Not now",
+      "failed": "Import failed. Please try again."
+    }
+  },
+  "actions": {
+    "manuscripts": {
+      "untitled": "Untitled page",
+      "begin": "Begin writing here…",
+      "invalidCreate": "Enter a name (up to 80 characters) and choose a style.",
+      "createFailed": "The manuscript could not be created. Please try again.",
+      "invalidImport": "This browser draft is invalid or too large. Export a JSON backup and check its contents.",
+      "importFailed": "The draft could not be imported. Your browser copy is still available.",
+      "invalid": "Invalid manuscript.",
+      "invalidVersion": "Invalid document version. Reload the manuscript.",
+      "saveFailed": "Saving failed. Your edits are still open; retry or download a JSON backup."
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close"
+  },
+  "home": {
+    "metaTitle": "Manuscript Builder — Free TTRPG Handout Creator",
+    "metaDescription": "Create TTRPG handouts, letters, grimoires and sci-fi datapads. Style illustrated manuscripts in your browser and export PNG or JSON. Free, no account required.",
+    "nav": {
+      "how": "How it works",
+      "faq": "FAQ",
+      "manuscripts": "Your manuscripts"
+    },
+    "hero": {
+      "eyebrow": "Bag Of Holding Tools",
+      "heading": "Give your players <accent>something to hold.</accent>",
+      "lede": "A summons sealed in wax. A page torn from a grimoire. A transmission that should never have arrived. Make the handouts that bring your world to life.",
+      "cta": "Create a handout →",
+      "dashboard": "Your manuscripts",
+      "note": "Free to create. No account needed. Your words stay yours."
+    },
+    "example": {
+      "aria": "Example royal decree",
+      "kicker": "BY ORDER OF THE CROWN",
+      "title": "A summons to<br></br>Blackmere Keep",
+      "p1": "Let it be known that, on the first night of the waning moon, you are called to the old keep at Blackmere.",
+      "p2": "Bring neither herald nor banner. Speak of this journey to no soul, for the roads are watched.",
+      "signature": "By my hand and seal",
+      "caption": "A story before the first dice roll."
+    },
+    "features": {
+      "eyebrow": "From a few words to a whole world",
+      "heading": "Write it. Style it. Put it in their hands.",
+      "items": [
+        {
+          "title": "A page worth passing around",
+          "body": "Write letters, secret orders and discoveries. Add illustrations and keep every page together in one manuscript."
+        },
+        {
+          "title": "Made for different worlds",
+          "body": "Switch from a royal decree to an arcane grimoire, a field dossier or an orbital datapad without rewriting your words."
+        },
+        {
+          "title": "Take it to the table",
+          "body": "Export a crisp PNG for your players. Keep an editable JSON backup to revisit the story later."
+        },
+        {
+          "title": "Pick up where you left off",
+          "body": "Work without an account in this browser, or save manuscripts to your account and open them from your dashboard."
+        }
+      ]
+    },
+    "styles": {
+      "heading": "Not every secret arrives on parchment.",
+      "body": "Four starting styles. Whatever world you are building."
+    },
+    "faq": {
+      "heading": "Before you begin",
+      "jsonLdName": "Manuscript Builder frequently asked questions",
+      "items": [
+        {
+          "q": "Is Manuscript Builder free?",
+          "a": "Yes. Create, edit and export manuscripts for free. No subscription or payment is required."
+        },
+        {
+          "q": "Do I need an account?",
+          "a": "No. The guest editor keeps your draft in this browser. Sign in when you want to save manuscripts to your account and open them on other devices."
+        },
+        {
+          "q": "Can I keep my existing browser draft?",
+          "a": "Yes. Your dashboard offers to import it into your account. The original browser copy stays on your device."
+        },
+        {
+          "q": "What can I export?",
+          "a": "Export the current page as a high-resolution PNG, or download the whole manuscript as an editable JSON backup."
+        }
+      ]
+    },
+    "closing": {
+      "heading": "The next clue is yours to write.",
+      "cta": "Start your manuscript →"
+    },
+    "jsonLd": {
+      "subCategory": "Tabletop roleplaying handout editor",
+      "description": "Create illustrated TTRPG handouts, letters, grimoires, dossiers and sci-fi datapads in your browser."
+    }
+  },
+  "workspace": {
+    "metaTitle": "Free handout editor",
+    "metaDescription": "Create letters, grimoires and datapads in your browser. No account required.",
+    "editMetaTitle": "Edit manuscript",
+    "srHeading": "Manuscript Builder — free TTRPG handout creator",
+    "srBody": "Create illustrated letters, royal decrees, grimoires, dossiers and sci-fi datapads for tabletop roleplaying games. Edit multiple pages, save locally, and export PNG images or editable JSON backups. No account required.",
+    "aria": {
+      "workspace": "Manuscript workspace",
+      "pages": "Manuscript pages",
+      "inspector": "Page inspector",
+      "zoom": "Zoom controls"
+    },
+    "initial": {
+      "name": "The Blackmere summons",
+      "page1Title": "A summons to Blackmere Keep",
+      "page1Body": "Let it be known that, on the first night of the waning moon, those named below are called to the old keep at Blackmere.\n\nBring neither herald nor banner. Speak of this journey to no soul, for the roads are watched and the ravens no longer carry messages for the crown.",
+      "page2Title": "The sealed instruction",
+      "page2Body": "Break this seal only when the western bell sounds twice.",
+      "untitled": "Untitled page",
+      "begin": "Begin writing here…"
+    },
+    "save": {
+      "localFailure": "Browser storage is full or unavailable. Download a JSON backup to keep your edits.",
+      "cloudFailure": "Could not save to your account. Retry or download a JSON backup.",
+      "retry": "Retry save",
+      "download": "Download JSON",
+      "notSaved": "Not saved",
+      "saved": "Saved",
+      "saving": "Saving…"
+    },
+    "image": {
+      "invalid": "Choose a PNG, JPEG, WebP or GIF illustration under 700 KB.",
+      "exportFailed": "The PNG could not be generated. Please try again.",
+      "uploadedAlt": "Uploaded manuscript illustration",
+      "currentAlt": "Current manuscript illustration",
+      "label": "Illustration",
+      "add": "Add an image",
+      "remove": "Remove"
+    },
+    "json": {
+      "invalid": "This JSON file is not a valid manuscript."
+    },
+    "toolbar": {
+      "aria": "Manuscript tools",
+      "fit": "Fit page",
+      "pages": "Pages",
+      "undo": "Undo",
+      "redo": "Redo",
+      "export": "Export",
+      "png": "Export PNG",
+      "json": "Download JSON",
+      "import": "Import JSON",
+      "settings": "Settings"
+    },
+    "navigation": {
+      "manuscripts": "Back to your manuscripts",
+      "home": "Back to home",
+      "back": "Back",
+      "waiting": "Waiting for your edits to save"
+    },
+    "pages": {
+      "heading": "Pages",
+      "count": "{count} in manuscript",
+      "close": "Close pages",
+      "open": "Open page {number}: {title}",
+      "add": "Add page"
+    },
+    "document": {
+      "signature": "By my hand and seal",
+      "seal": "Seal decoration"
+    },
+    "zoom": {
+      "in": "Zoom in",
+      "out": "Zoom out",
+      "reset": "Reset zoom"
+    },
+    "inspector": {
+      "open": "Edit page",
+      "close": "Close inspector",
+      "page": "Page {number}",
+      "tabs": {
+        "details": "Details",
+        "style": "Style",
+        "page": "Page"
+      },
+      "title": "Title",
+      "body": "Body",
+      "bold": "Bold selected text",
+      "italic": "Italic selected text",
+      "boldText": "bold text",
+      "italicText": "italic text",
+      "alignLeft": "Align left",
+      "alignCenter": "Align center",
+      "alignRight": "Align right",
+      "characters": "{count} characters",
+      "style": "Manuscript style",
+      "useStyle": "Use {style} style",
+      "about": "About Manuscript Builder",
+      "name": "Manuscript name",
+      "format": "Format",
+      "pageSize": "Page size",
+      "portrait": "A4 portrait",
+      "numbering": "Numbering",
+      "visible": "Visible",
+      "delete": "Delete page"
+    },
+    "account": {
+      "checking": "Checking account",
+      "account": "Account",
+      "library": "Library",
+      "signIn": "Sign in",
+      "cloudSaved": "Saved to account",
+      "guestSaved": "Guest — saved in this browser",
+      "localSaved": "Saved locally",
+      "savingLocal": "Saving locally…",
+      "saving": "Saving…",
+      "notSaved": "Not saved"
+    },
+    "themes": {
+      "royal": {
+        "name": "Royal decree",
+        "family": "Medieval",
+        "label": "BY ORDER OF THE CROWN"
+      },
+      "arcane": {
+        "name": "Arcane grimoire",
+        "family": "Fantasy",
+        "label": "THE THIRD CONJURATION"
+      },
+      "datapad": {
+        "name": "Orbital datapad",
+        "family": "Science fiction",
+        "label": "TRANSMISSION // 08.41"
+      },
+      "dossier": {
+        "name": "Field dossier",
+        "family": "Modern",
+        "label": "EYES ONLY // CASE 47"
+      }
+    }
+  }
+}
