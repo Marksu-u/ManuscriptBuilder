@@ -217,3 +217,23 @@ button { cursor: pointer; }
   .manuscript-page { width: 210mm; height: 297mm; margin: 0; transform: none !important; box-shadow: none; print-color-adjust: exact; }
 }
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
+
+/* Framed landing page: the suite's typography and surfaces surround a real document. */
+.landing-paper-stage { position: relative; display: flex; min-height: 550px; align-items: center; justify-content: center; padding: 22px 16px 46px; background: radial-gradient(ellipse,#ef9f270b,transparent 70%); }
+.landing-paper { position: relative; width: 340px; min-height: 475px; padding: 55px 42px 110px; transform: rotate(3deg); color: #352719; background: #eadfc3; box-shadow: 0 25px 70px #0009; font-family: Georgia,serif; }
+.landing-paper::before, .landing-paper::after { content:''; position:absolute; left:28px; right:28px; height:1px; background:#a78963; }
+.landing-paper::before {top:25px;} .landing-paper::after {bottom:25px;}
+.landing-paper .landing-paper-kicker { font-family:var(--font-geist-mono),monospace; font-size:7px; letter-spacing:.17em; color:#8e2f2c; text-align:center; }
+.landing-paper h2 { margin-top:18px; font-size:27px; line-height:1.1; text-align:center; font-weight:600; }
+.landing-paper p { margin-top:18px; font-size:12px; line-height:1.7; }
+.landing-paper-rule { width:80px; height:1px; margin:20px auto; background:#a78963; }
+.landing-paper .landing-signature { position:absolute; bottom:76px; left:42px; font-size:10px; font-style:italic; }
+.landing-seal { position:absolute; right:38px; bottom:55px; display:grid; place-items:center; width:54px; height:54px; border:4px double #bd6a5b; border-radius:50%; background:#963b36; color:#eadfc3; box-shadow:0 4px 9px #0005; font-size:13px; }
+.landing-folio { position:absolute; bottom:8px; left:50%; font-size:8px; }
+.landing-paper-caption { position:absolute; bottom:0; color:var(--text-muted); font-size:11px; }
+.landing-style { height:230px; display:flex; flex-direction:column; padding:28px 20px; border-radius:4px; box-shadow:0 12px 30px #0004; transition:transform .2s; }
+.landing-style span { min-height:44px; font-size:9px; letter-spacing:.12em; text-transform:uppercase; text-align:center; }
+.landing-style div { height:2px; margin:8px 0; opacity:.3; background:currentColor; }
+.landing-style div:nth-child(3) {width:80%;} .landing-style b { margin-top:auto; font-size:25px; text-align:right; font-weight:400; }
+.group:hover .landing-style {transform:translateY(-4px);}
+@media(max-width:640px){.landing-paper-stage{min-height:475px;} .landing-paper{width:290px;min-height:420px;padding:42px 30px 100px;} .landing-paper h2{font-size:24px;} .landing-style{height:200px;padding:22px 16px;}}

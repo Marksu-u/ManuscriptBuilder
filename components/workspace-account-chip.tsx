@@ -1,17 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, CloudOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 
-export function WorkspaceAccountChip({ saved }: { saved: boolean }) {
+export function WorkspaceAccountChip({ saved, cloud = false, error = false }: { saved: boolean; cloud?: boolean; error?: boolean }) {
   const supabase = useMemo(() => createClient(), []);
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (cloud) return;
     let active = true;
     void supabase.auth.getUser().then(({ data }) => {
       if (active) {
@@ -29,7 +30,9 @@ export function WorkspaceAccountChip({ saved }: { saved: boolean }) {
       active = false;
       listener.subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [supabase, cloud]);
+
+  if (cloud) return <div className="account-chip floating-chrome" role="status">{error ? <CloudOff /> : saved ? <Check className="account-success" /> : <Loader2 className="account-spinner" />}<span>{error ? 'Not saved' : saved ? 'Saved to account' : 'Saving…'}</span><Link href="/account">Account</Link></div>;
 
   if (!ready) {
     return (
@@ -43,7 +46,7 @@ export function WorkspaceAccountChip({ saved }: { saved: boolean }) {
     return (
       <div className="account-chip floating-chrome">
         <span className="guest-dot" aria-hidden="true" />
-        <span>Guest — saved in this browser</span>
+        <span>{error ? 'Not saved' : saved ? 'Guest — saved in this browser' : 'Saving locally…'}</span>
         <Link href="/login">Sign in</Link>
       </div>
     );
@@ -51,9 +54,9 @@ export function WorkspaceAccountChip({ saved }: { saved: boolean }) {
 
   return (
     <div className="account-chip floating-chrome">
-      {saved ? <Check className="account-success" /> : <Loader2 className="account-spinner" />}
-      <span>{saved ? "Saved locally" : "Saving…"}</span>
-      <Link href="/account">Account</Link>
+      {error ? <CloudOff /> : saved ? <Check className="account-success" /> : <Loader2 className="account-spinner" />}
+      <span>{error ? 'Not saved' : saved ? "Saved locally" : "Saving…"}</span>
+      <Link href="/dashboard">Library</Link>
     </div>
   );
 }

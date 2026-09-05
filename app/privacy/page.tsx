@@ -15,13 +15,13 @@ export default function PrivacyPage() {
         <p>This policy describes Manuscript Builder’s current data handling. The controller is its publisher, {PUBLISHER_ALIAS}, an individual operating Bag Of Holding Tools on a personal and non-commercial basis. For privacy questions or requests, contact <Contact />. Publisher and hosting details are in the <LegalLink href="/legal">Legal Notice</LegalLink>.</p>
         <p>Personal data is information that identifies you directly or indirectly. We handle it under the GDPR and applicable French data protection law. Other Bag Of Holding Tools apps share sign-in but describe their own features in their own policies.</p>
       </Section>
-      <Section title="2. Manuscripts stay in this browser">
-        <p>The current editor stores the manuscript name, pages, text, formatting, selected style and imported illustrations in your browser. This applies to guests and signed-in users. The editor does not upload these drafts to our account database or sync them between devices.</p>
-        <p>Image imports, JSON imports and PNG or JSON exports are processed on your device. We cannot read or recover your local drafts through the service. Content you choose to email to support or share with another service is outside this local-only workflow.</p>
+      <Section title="2. Guest drafts and saved manuscripts">
+        <p>The guest editor at /workspace stores the manuscript name, pages, text, formatting, selected style and imported illustrations in your browser. Signing in does not automatically upload that draft. If you create a manuscript from your dashboard or choose to import a browser draft, its contents are stored in your account database and subsequent edits are saved there so you can open them on other devices.</p>
+        <p>PNG and JSON exports are generated on your device. Illustrations and JSON you import into an account manuscript are included in its saved contents. Browser drafts that you have not imported remain local, and we cannot recover them through the service.</p>
       </Section>
       <Section title="3. Optional Google sign-in">
         <p>If you choose Google sign-in, Google and Supabase process the identity and session information needed to authenticate you. This may include your email address, account identifiers and profile metadata supplied by Google. We do not receive your Google password.</p>
-        <p>Manuscript Builder’s account record contains your email address, shared authentication identifier and account timestamps. We use these to identify your account and provide account management. The legal basis is performance of the account service you request. You can edit manuscripts without supplying this information.</p>
+        <p>Manuscript Builder’s account record contains your email address, shared authentication identifier and account timestamps. Account manuscripts contain their title, style, pages, text, illustrations and update timestamps. We use these to identify your account, save your manuscripts and let you retrieve them on other devices. The legal basis is performance of the account service you request. You can edit manuscripts without supplying this information.</p>
       </Section>
       <Section title="4. Technical and support information">
         <p>Hosting and authentication providers process connection information, such as IP addresses, request times, browser information and authentication events, to deliver and secure the service. This is separate from manuscript content. We rely on our legitimate interest in operating a reliable service and preventing abuse.</p>
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
       </Section>
       <Section title="5. Providers and international processing">
         <ul className="list-disc space-y-2 pl-5">
-          <li><LegalLink href="https://supabase.com/privacy">Supabase</LegalLink> provides shared authentication and account database hosting.</li>
+          <li><LegalLink href="https://supabase.com/privacy">Supabase</LegalLink> provides shared authentication and database hosting for account records and saved manuscripts.</li>
           <li><LegalLink href={HOST.privacyUrl}>Vercel</LegalLink> hosts and delivers the application.</li>
           <li><LegalLink href="https://policies.google.com/privacy">Google</LegalLink> provides sign-in when you choose it.</li>
         </ul>
@@ -38,7 +38,7 @@ export default function PrivacyPage() {
       </Section>
       <Section title="6. Retention and deletion">
         <p>Your local draft remains until it is replaced, you clear this site’s browser storage, or your browser removes it. Downloaded files remain wherever you save them. Signing out or deleting your account does not erase either kind of local copy.</p>
-        <p>Account records are retained while your account exists. The <LegalLink href="/account">Account page</LegalLink> lets you delete the shared sign-in and Manuscript Builder account records. This affects sign-in to the other suite apps. Contact us if you need help with data held by another tool.</p>
+        <p>Account records and saved manuscripts are retained while your account exists. The <LegalLink href="/account">Account page</LegalLink> lets you delete the shared sign-in and Manuscript Builder account records, including saved manuscripts and their pages. This affects sign-in to the other suite apps. Contact us if you need help with data held by another tool.</p>
         <p>Support correspondence is kept for the time needed to resolve and follow up on the request. Technical logs and provider backups follow the providers’ configured retention cycles; deletion from active records may not immediately remove backup copies. Information needed to meet a legal obligation or resolve a dispute may be retained for that purpose.</p>
       </Section>
       <Section title="7. Your choices and rights">

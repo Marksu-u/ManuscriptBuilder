@@ -2,6 +2,9 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { saveManuscript } from '@/app/actions/manuscripts';
 import { toPng } from 'html-to-image';
 import {
   AlignCenter, AlignLeft, AlignRight, Check, FilePlus2,
@@ -15,11 +18,8 @@ import { WorkspaceToolbar } from '@/components/workspace-toolbar';
 import { LegalLinks } from '@/components/legal/legal-footer';
 import { triggerJsonDownload } from '@/lib/export';
 
-type ThemeId = 'royal' | 'arcane' | 'datapad' | 'dossier';
-type TextAlign = 'left' | 'center' | 'right';
+import { INITIAL, STORAGE_KEY, themes, validManuscript, type ThemeId, type Page, type Manuscript } from '@/lib/manuscript-data';
 type InspectorTab = 'details' | 'style' | 'page';
-type Page = { id: string; title: string; body: string; align: TextAlign; image?: string };
-type Manuscript = { name: string; pages: Page[]; activeId: string; theme: ThemeId };
 
 type WebMcpTool = {
   name: string; title: string; description: string; inputSchema: Record<string, unknown>;
@@ -33,25 +33,6 @@ declare global {
   }
 }
 
-const STORAGE_KEY = 'boh-manuscript-v1';
-const themes: Record<ThemeId, { name: string; family: string; label: string }> = {
-  royal: { name: 'Royal decree', family: 'Medieval', label: 'BY ORDER OF THE CROWN' },
-  arcane: { name: 'Arcane grimoire', family: 'Fantasy', label: 'THE THIRD CONJURATION' },
-  datapad: { name: 'Orbital datapad', family: 'Science fiction', label: 'TRANSMISSION // 08.41' },
-  dossier: { name: 'Field dossier', family: 'Modern', label: 'EYES ONLY // CASE 47' },
-};
-
-const INITIAL: Manuscript = {
-  name: 'The Blackmere summons', theme: 'royal', activeId: 'page-1',
-  pages: [
-    {
-      id: 'page-1', title: 'A summons to Blackmere Keep', align: 'left',
-      body: 'Let it be known that, on the first night of the waning moon, those named below are called to the old keep at Blackmere.\n\nBring neither herald nor banner. Speak of this journey to no soul, for the roads are watched and the ravens no longer carry messages for the crown.',
-    },
-    { id: 'page-2', title: 'The sealed instruction', align: 'left', body: 'Break this seal only when the western bell sounds twice.' },
-  ],
-};
-
 function inlineMarkup(text: string) {
   return text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).map((part, index) => {
     if (part.startsWith('**') && part.endsWith('**')) return <strong key={index}>{part.slice(2, -2)}</strong>;
@@ -60,18 +41,19 @@ function inlineMarkup(text: string) {
   });
 }
 
-function validManuscript(value: unknown): value is Manuscript {
-  if (!value || typeof value !== 'object') return false;
-  const item = value as Partial<Manuscript>;
-  return typeof item.name === 'string' && typeof item.activeId === 'string' &&
-    typeof item.theme === 'string' && item.theme in themes && Array.isArray(item.pages) && item.pages.length > 0 &&
-    item.pages.every((page) => page && typeof page.id === 'string' && typeof page.title === 'string' && typeof page.body === 'string');
-}
-
-export default function ManuscriptWorkspace() {
-  const [manuscript, setManuscript] = useState<Manuscript>(INITIAL);
+export default function ManuscriptWorkspace({ initialManuscript = INITIAL, documentId, initialVersion = '' }: {
+  initialManuscript?: Manuscript; documentId?: string; initialVersion?: string;
+}) {
+  const router = useRouter();
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [manuscript, setManuscript] = useState<Manuscript>(initialManuscript);
   const [saved, setSaved] = useState(true);
-  const [hydrated, setHydrated] = useState(false);
+  const [hydrated, setHydrated] = useState(Boolean(documentId));
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const version = useRef(initialVersion);
+  const latestDraft = useRef(manuscript);
+  useEffect(() => { latestDraft.current = manuscript; }, [manuscript]);
   const [zoom, setZoom] = useState(78);
   const [pagesOpen, setPagesOpen] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(true);
@@ -93,6 +75,7 @@ export default function ManuscriptWorkspace() {
   const activeIndex = manuscript.pages.findIndex((page) => page.id === active.id);
 
   useEffect(() => {
+    if (documentId) return;
     const timer = window.setTimeout(() => {
       try {
         const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -104,16 +87,39 @@ export default function ManuscriptWorkspace() {
       setHydrated(true);
     }, 0);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [documentId]);
 
   useEffect(() => {
-    if (!hydrated || saved) return;
+    if (!hydrated || saved || saving || saveError) return;
     const timer = window.setTimeout(() => {
-      try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(manuscript)); } catch { /* Keep editing if storage is full. */ }
-      setSaved(true);
-    }, 450);
+      if (!documentId) {
+        try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(manuscript)); setSaved(true); }
+        catch { setSaveError('Browser storage is full or unavailable. Download a JSON backup to keep your edits.'); }
+        return;
+      }
+      setSaving(true);
+      void saveManuscript(documentId, version.current, manuscript).then(result => {
+        if ('error' in result) setSaveError(result.error);
+        else {
+          version.current = result.version;
+          if (latestDraft.current === manuscript) setSaved(true);
+        }
+      }).catch(() => setSaveError('Could not save to your account. Retry or download a JSON backup.'))
+        .finally(() => setSaving(false));
+    }, 600);
     return () => window.clearTimeout(timer);
-  }, [hydrated, manuscript, saved]);
+  }, [hydrated, manuscript, saved, saving, saveError, documentId]);
+
+  useEffect(() => {
+    if (saved) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ''; };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [saved]);
+
+  useEffect(() => {
+    if (saved && pendingNavigation) router.push(pendingNavigation);
+  }, [saved, pendingNavigation, router]);
 
   function commit(change: (current: Manuscript) => Manuscript) {
     setManuscript((current) => {
@@ -124,6 +130,7 @@ export default function ManuscriptWorkspace() {
     setCanUndo(true);
     setCanRedo(false);
     setSaved(false);
+    setSaveError(null);
   }
 
   function updateActive(patch: Partial<Page>) {
@@ -138,7 +145,7 @@ export default function ManuscriptWorkspace() {
     if (!previous) return;
     setManuscript((current) => { redoStack.current.push(current); return previous; });
     undoStack.current.pop();
-    setCanUndo(undoStack.current.length > 0); setCanRedo(true); setSaved(false);
+    setCanUndo(undoStack.current.length > 0); setCanRedo(true); setSaved(false); setSaveError(null);
   }
 
   function redo() {
@@ -146,7 +153,7 @@ export default function ManuscriptWorkspace() {
     if (!next) return;
     setManuscript((current) => { undoStack.current.push(current); return next; });
     redoStack.current.pop();
-    setCanRedo(redoStack.current.length > 0); setCanUndo(true); setSaved(false);
+    setCanRedo(redoStack.current.length > 0); setCanUndo(true); setSaved(false); setSaveError(null);
   }
 
   useEffect(() => {
@@ -187,7 +194,11 @@ export default function ManuscriptWorkspace() {
   }
 
   function chooseImage(file?: File) {
-    if (!file || !file.type.startsWith('image/')) return;
+    if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type) || file.size > 700_000) {
+      window.alert('Choose a PNG, JPEG, WebP or GIF illustration under 700 KB.');
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => { if (typeof reader.result === 'string') updateActive({ image: reader.result }); };
     reader.readAsDataURL(file);
@@ -275,7 +286,14 @@ export default function ManuscriptWorkspace() {
   }, [active.id]);
 
   return (
-    <main className="app-shell">
+    <main className="app-shell" onClickCapture={event => {
+      if (saved || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = (event.target as Element).closest<HTMLAnchorElement>('a[href]');
+      if (!link || link.target === '_blank' || link.hasAttribute('download') || link.origin !== window.location.origin) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setPendingNavigation(link.pathname + link.search + link.hash);
+    }}>
       <h1 className="sr-only">Manuscript Builder — free TTRPG handout creator</h1>
       <p className="sr-only">Create illustrated letters, royal decrees, grimoires, dossiers and sci-fi datapads for tabletop roleplaying games. Edit multiple pages, save locally, and export PNG images or editable JSON backups. No account required.</p>
       <section className="canvas-area" aria-label="Manuscript workspace">
@@ -306,15 +324,18 @@ export default function ManuscriptWorkspace() {
           />
 
           <div className="identity-chip floating-chrome">
+            <Link href={documentId ? '/dashboard' : '/'} aria-label={documentId ? 'Back to your manuscripts' : 'Back to home'} title={saved ? 'Back' : 'Waiting for your edits to save'} aria-disabled={!saved} onClick={event => { if (!saved) event.preventDefault(); }} className="text-zinc-400 hover:text-zinc-100">←</Link>
             <span className="manuscript-mark" aria-hidden="true"><Sparkles /></span>
             <span className="identity-name" title={manuscript.name}>{manuscript.name}</span>
             <span className="identity-stats">{manuscript.pages.length} · A4</span>
           </div>
 
           <div className="top-right-actions">
-            <WorkspaceAccountChip saved={saved} />
+            <WorkspaceAccountChip saved={saved} cloud={Boolean(documentId)} error={Boolean(saveError)} />
           </div>
         </div>
+
+        {saveError && <div role="alert" className="absolute bottom-4 left-1/2 z-40 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 rounded-lg border border-destructive/40 bg-zinc-900 px-4 py-3 text-sm text-zinc-200"><p className="max-w-lg">{saveError}</p><button className="mt-2 underline underline-offset-2" onClick={() => setSaveError(null)}>Retry save</button><button className="ml-4 underline underline-offset-2" onClick={downloadJson}>Download JSON</button></div>}
 
         {pagesOpen && (
           <aside className="pages-panel floating-panel" aria-label="Manuscript pages">
@@ -414,7 +435,7 @@ export default function ManuscriptWorkspace() {
                   <Field label="Manuscript name"><input value={manuscript.name} maxLength={80} onChange={(event) => commit((current) => ({ ...current, name: event.target.value }))} /></Field>
                   <Field label="Format"><div className="property-row"><span>Page size</span><strong>A4 portrait</strong></div><div className="property-row"><span>Numbering</span><strong>Visible</strong></div></Field>
                 </TabsContent>
-                <footer><button type="button" className="saved-button" disabled><Check /> {saved ? 'Saved' : 'Saving…'}</button><button type="button" className="trash-button" disabled={manuscript.pages.length === 1} onClick={deletePage} aria-label="Delete page"><Trash2 /></button></footer>
+                <footer><button type="button" className="saved-button" disabled><Check /> {saveError ? 'Not saved' : saved ? 'Saved' : 'Saving…'}</button><button type="button" className="trash-button" disabled={manuscript.pages.length === 1} onClick={deletePage} aria-label="Delete page"><Trash2 /></button></footer>
               </form>
             </Tabs>
           </aside>

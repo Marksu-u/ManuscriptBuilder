@@ -1,65 +1,86 @@
 # Manuscript Builder
 
-Manuscript Builder is a free browser-based editor for creating immersive TTRPG
-documents: royal decrees, handwritten letters, arcane grimoires, field
-dossiers, science-fiction datapads, and other in-world handouts.
+Manuscript Builder is a free handout editor designed for D&D, Pathfinder, other
+TTRPG campaigns, and fictional worldbuilding.
 
-It is part of **Bag Of Holding Tools** and shares the suite's visual language,
-workspace layout, and optional account system.
+Write royal decrees, secret letters, grimoire pages, field dossiers, and
+science-fiction transmissions. Style each manuscript, add illustrations, and
+export a handout for your players. An account is optional: guest mode opens
+directly in the editor and stores its work in the browser.
+
+## Why it exists
+
+A letter from a missing ally, a sealed summons, or an intercepted transmission
+can turn a plot hook into something players can hold. Creating those documents
+should not require a desktop publishing application or a new layout for every
+session.
+
+Manuscript Builder keeps writing and presentation together. The same words can
+become a parchment decree, an arcane text, a classified report, or a terminal
+readout by changing the manuscript's style.
 
 ## Features
 
 - Multi-page manuscripts with a live print-style preview.
 - Royal Decree, Arcane Grimoire, Orbital Datapad, and Field Dossier themes.
-- Titles, body text, bold and italic markup, text alignment, and illustrations.
+- Page titles, body text, bold and italic markup, alignment, and illustrations.
 - Page management, undo and redo, zoom controls, and a focused inspector.
+- Guest drafts stored locally in the browser.
+- Account dashboard for creating and reopening saved manuscripts.
+- Cloud autosave for signed-in manuscripts, including guest-draft import.
+- Version checks that prevent older tabs from overwriting newer saves.
 - High-resolution PNG export of the current page.
-- JSON download and import for editable manuscript backups.
-- Automatic guest-draft saving in browser local storage.
-- Optional Google sign-in through the shared Bag Of Holding Tools account.
+- Editable JSON download and import.
 
-The editor is designed to grow beyond a fixed template list. A manuscript style
-can describe any setting or medium, from parchment and magical correspondence
-to terminals, intelligence reports, alien inscriptions, and campaign-specific
-documents.
+## Who it is for
+
+Dungeon masters preparing clues and correspondence, players writing in-character
+letters, and worldbuilders creating documents from their settings. Nothing in
+the editor is tied to a specific game system or genre.
 
 ## Tech stack
 
 Next.js 16 · React 19 · TypeScript · Tailwind CSS · Base UI · Prisma ·
 PostgreSQL · Supabase Auth · Vercel.
 
-Manuscript data is isolated in its own PostgreSQL schema while authentication
-is shared with the other Bag Of Holding Tools applications.
+The editor lives in
+[`components/manuscript-workspace.tsx`](components/manuscript-workspace.tsx).
+Guest drafts use browser storage; account manuscripts and their pages are
+stored in a dedicated PostgreSQL schema.
+
+Manuscript Builder is part of **Bag Of Holding Tools**, a family of free TTRPG
+utilities with a shared visual language and optional account system.
 
 ## Running locally
+
+Use Node.js 22.13 or later and pnpm. Copy the environment template and configure
+the Supabase and database values before installing dependencies.
 
 ```bash
 cp .env.example .env.local
 pnpm install
-pnpm prisma
+pnpm exec prisma generate
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Guest editing works without
-signing in.
+Open [http://localhost:3000](http://localhost:3000). Guest mode is available at
+`/workspace` without signing in. Signed-in users can access their manuscripts
+at `/dashboard`.
 
 ```bash
 pnpm typecheck
 pnpm lint
+pnpm test
 pnpm build
 ```
+
+`pnpm test:database` checks ownership, save conflicts, and page persistence
+against the configured database. Its temporary fixtures are rolled back after
+the checks.
 
 Deployment-specific values are documented in `.env.example` and configured in
 the hosting environment rather than in this README.
 
-## Legal pages
+## License
 
-Manuscript Builder serves its own `/legal`, `/privacy`, `/terms`, and `/cookies`
-pages. They are public and do not depend on authentication. Links are available
-on sign-in and account pages and in the workspace's Settings panel.
-
-Publisher and contact details live in `lib/legal.ts`; shared document styling
-and navigation live in `components/legal`. The policies describe the current
-editor: drafts and imported images stay in browser storage even when signed in,
-and no analytics integration is enabled. Update the policies and their revision
-date when storage, account behavior, providers, or tracking change.
+[MIT](LICENSE) — Copyright © 2026 mKzz.

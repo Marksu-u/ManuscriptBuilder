@@ -17,7 +17,7 @@ export default function LegalNoticePage() {
       </Section>
       <Section title="Hosting">
         <p>The application is hosted by {HOST.name}, {HOST.address}. Website: <LegalLink href="https://vercel.com">vercel.com</LegalLink>. Host contact: <LegalLink href={`mailto:${HOST.email}`}>{HOST.email}</LegalLink>.</p>
-        <p>Shared sign-in and account data are hosted by <LegalLink href="https://supabase.com">Supabase</LegalLink>. Manuscript drafts in the current editor are stored in your browser. See our <LegalLink href="/privacy">Privacy Policy</LegalLink> for the distinction.</p>
+        <p>Shared sign-in and account data are hosted by <LegalLink href="https://supabase.com">Supabase</LegalLink>. Guest drafts are stored in your browser; manuscripts you create or import into your account are stored in the account database. See our <LegalLink href="/privacy">Privacy Policy</LegalLink> for the distinction.</p>
       </Section>
       <Section title="Intellectual property">
         <p>The application, branding and original assets are protected by intellectual property law. Third-party components and assets remain subject to their respective rights and licenses. Any license supplied with the source code governs use of that code.</p>

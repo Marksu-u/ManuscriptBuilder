@@ -37,7 +37,7 @@ function LoginContent() {
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight text-zinc-100">Sign in</h1>
-          <p className="text-sm text-zinc-400">Use your Bag Of Holding Tools account. Manuscript drafts stay in this browser.</p>
+          <p className="text-sm text-zinc-400">Save manuscripts to your account and pick up where you left off on another device.</p>
         </div>
 
         <div className="space-y-3">
@@ -63,7 +63,7 @@ function LoginContent() {
 
         <p className="text-center text-xs text-zinc-500">
           No account needed to use the tool.{" "}
-          <Link href="/" className="underline hover:text-zinc-300">Try it as a guest →</Link>
+          <Link href="/workspace" className="underline hover:text-zinc-300">Try it as a guest →</Link>
         </p>
       </div>
     </main>

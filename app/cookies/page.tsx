@@ -18,8 +18,8 @@ export default function CookiesPage() {
         <p>These support the account service you request, rather than advertising or analytics. Session cookies are renewed while the session is active and are removed on sign-out or expire according to the authentication settings. Blocking or deleting them can sign you out or prevent sign-in. Guest editing remains available.</p>
       </Section>
       <Section title="3. Local manuscript storage">
-        <p>The browser storage entry <code className="break-all text-zinc-300">boh-manuscript-v1</code> holds your current manuscript: its name, pages, text, formatting, theme, illustrations and selected page. It is used for both guests and signed-in users, so your work can be restored in the same browser.</p>
-        <p>This entry has no automatic expiry set by the app. It remains until replaced, cleared by you, or removed by the browser. It is not sent to our servers by the editor. Signing out or deleting your account does not clear it.</p>
+        <p>The browser storage entry <code className="break-all text-zinc-300">boh-manuscript-v1</code> holds your current manuscript: its name, pages, text, formatting, theme, illustrations and selected page. It is used in the guest editor, including when you are signed in, so your local work can be restored in the same browser. Account manuscripts opened from the dashboard are stored in the account database and do not overwrite this browser draft.</p>
+        <p>This entry has no automatic expiry set by the app. It remains until replaced, cleared by you, or removed by the browser. It is only uploaded if you explicitly choose to import the browser draft from your dashboard. Signing out or deleting your account does not clear it.</p>
       </Section>
       <Section title="4. No optional tracking">
         <p>Manuscript Builder does not integrate analytics, advertising, social-media tracking or personalization cookies. There is no analytics consent record or optional tracking preference to enable in this app.</p>

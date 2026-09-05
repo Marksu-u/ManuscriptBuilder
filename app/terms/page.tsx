@@ -16,15 +16,15 @@ export default function TermsPage() {
       </Section>
       <Section title="2. Eligibility and accounts">
         <p>You must have the legal capacity to accept these terms. Minors must have permission from a parent or legal guardian. The service is not directed at children under 15.</p>
-        <p>Google sign-in is optional and uses the shared Bag Of Holding Tools account. Keep that account secure and do not use another person’s identity without authorization. Signing in currently does not sync Manuscript Builder drafts between devices.</p>
+        <p>Google sign-in is optional and uses the shared Bag Of Holding Tools account. Keep that account secure and do not use another person’s identity without authorization. Manuscripts created in your dashboard or explicitly imported into your account are saved online and can be opened on other devices. Signing in alone does not upload an existing guest draft.</p>
       </Section>
       <Section title="3. Local drafts and backups">
-        <p>The editor saves its current manuscript in this browser, including when you are signed in. Browser storage is not a guaranteed backup: clearing site data, using private browsing, changing devices or exceeding storage limits may make your work unavailable.</p>
+        <p>The guest editor saves its current manuscript in this browser, including when you are signed in. The account editor saves manuscripts to your account and shows whether saving succeeded. Browser storage is not a guaranteed backup: clearing site data, using private browsing, changing devices or exceeding storage limits may make your work unavailable.</p>
         <p>Use Download JSON in the export menu to keep an editable backup. Importing a manuscript replaces the current draft. PNG exports are rendered documents, not editable backups. The publisher cannot recover drafts stored only on your device.</p>
       </Section>
       <Section title="4. Your content">
         <p>You retain the rights you hold in your manuscripts, illustrations and exports. You must have the necessary rights to the text, images and personal information you import. Do not use the service to infringe copyright, privacy or other people’s rights.</p>
-        <p>The current editor does not publish your manuscript or create public sharing links. If you distribute an exported file, you control its recipients and are responsible for that distribution.</p>
+        <p>Saved manuscripts are private to your account. The editor does not publish manuscripts or create public sharing links. If you distribute an exported file, you control its recipients and are responsible for that distribution.</p>
       </Section>
       <Section title="5. Acceptable use">
         <ul className="list-disc space-y-1 pl-5">

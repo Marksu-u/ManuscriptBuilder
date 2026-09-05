@@ -19,7 +19,7 @@ export default async function AccountPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-zinc-100">
-      <FramedHeader toolName="← Manuscript Builder" href="/" maxWidth="max-w-xl">
+      <FramedHeader toolName="← Your manuscripts" href="/dashboard" maxWidth="max-w-xl">
         <form action={signOut}>
           <button type="submit" className="cursor-pointer text-xs text-zinc-500 transition-colors hover:text-zinc-300">
             Sign out
