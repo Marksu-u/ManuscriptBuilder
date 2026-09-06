@@ -12,12 +12,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { themes, type ThemeId } from '@/lib/manuscript-data';
 
 export function CreateManuscriptDialog() {
   const t = useTranslations('dashboard');
   const tNew = useTranslations('dashboard.new');
-  const tTheme = useTranslations('workspace.themes');
   const tCommon = useTranslations('common');
   const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState(createManuscript, null);
@@ -48,12 +46,7 @@ export function CreateManuscriptDialog() {
             <span>{tNew('name')}</span>
             <input name="name" maxLength={80} required autoFocus placeholder={tNew('namePlaceholder')} />
           </label>
-          <label className="field">
-            <span>{tNew('style')}</span>
-            <select name="theme" className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm">
-              {Object.keys(themes).map((id) => <option key={id} value={id}>{tTheme(`${id as ThemeId}.name`)}</option>)}
-            </select>
-          </label>
+          <input type="hidden" name="theme" value="dossier"/>
           {state?.error && <p role="alert" className="text-sm text-destructive">{state.error}</p>}
           <div className="flex items-center justify-end gap-3 pt-1">
             <DialogClose render={<button className="rounded-md border border-zinc-700 px-4 py-2 text-sm text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200" />}>
