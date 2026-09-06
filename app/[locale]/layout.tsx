@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Cormorant_Garamond, Caveat, Great_Vibes, UnifrakturMaguntia, Special_Elite, Orbitron } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -13,6 +13,13 @@ import "../globals.css";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+
+const book = Cormorant_Garamond({variable:'--font-book',subsets:['latin']});
+const hand = Caveat({variable:'--font-hand',subsets:['latin']});
+const calligraphy = Great_Vibes({variable:'--font-calligraphy',weight:'400',subsets:['latin']});
+const blackletter = UnifrakturMaguntia({variable:'--font-blackletter',weight:'400',subsets:['latin']});
+const typewriter = Special_Elite({variable:'--font-typewriter',weight:'400',subsets:['latin']});
+const technical = Orbitron({variable:'--font-technical',subsets:['latin']});
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -54,7 +61,7 @@ export default async function LocaleLayout({ children, params }: Readonly<{ chil
       { "@type": "Organization", "@id": `${SITE_URL}/#publisher`, name: "Bag Of Holding Tools", url: SITE_URL, description: t("orgDescription"), sameAs: ["https://x.com/marksu_u", SOURCE_REPO_URL] },
     ],
   };
-  return <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}>
+  return <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} ${book.variable} ${hand.variable} ${calligraphy.variable} ${blackletter.variable} ${typewriter.variable} ${technical.variable} h-full antialiased dark`}>
     <body className="min-h-full flex flex-col">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(siteJsonLd) }} />
       <NextIntlClientProvider>

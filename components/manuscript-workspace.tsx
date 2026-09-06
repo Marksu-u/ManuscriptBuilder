@@ -1,22 +1,24 @@
 'use client';
 
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Image from 'next/image';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/navigation';
 import { saveManuscript } from '@/app/actions/manuscripts';
 import { toPng } from 'html-to-image';
 import {
-  AlignCenter, AlignLeft, AlignRight, Check, ChevronLeft, FilePlus2,
-  ImagePlus, Italic, Minus, Plus, Settings, Sparkles, Square, Trash2, X,
+  Check, ChevronLeft, FilePlus2, Minus, Plus, Magnet, Layers, Sparkles, Square, Trash2, X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { WorkspaceAccountChip } from '@/components/workspace-account-chip';
 import { WorkspaceToolbar } from '@/components/workspace-toolbar';
 import { LegalLinks } from '@/components/legal/legal-footer';
+import { CompositionCanvas } from '@/components/composition-canvas';
+import { CompositionPanel, type PanelMode } from '@/components/composition-panel';
+import { composePage } from '@/lib/composition-migration';
+import { assetIds, baseElement, blankComposition, canEdit, type Composition } from '@/lib/composition';
+const artPath = (id: string) => `/art/${id}.png`;
 import { triggerJsonDownload } from '@/lib/export';
 
 import {
@@ -24,33 +26,12 @@ import {
   STORAGE_KEY,
   exportManuscript,
   parseManuscriptExport,
-  themes,
-  validManuscript,
-  type ThemeId,
+  getTextLayout,
+  manuscriptSchema,
   type Page,
   type Manuscript,
 } from '@/lib/manuscript-data';
-type InspectorTab = 'details' | 'style' | 'page';
-
-type WebMcpTool = {
-  name: string; title: string; description: string; inputSchema: Record<string, unknown>;
-  annotations: { readOnlyHint: boolean; untrustedContentHint: boolean };
-  execute: (input: unknown) => unknown;
-};
-
-declare global {
-  interface Document {
-    modelContext?: { registerTool: (tool: WebMcpTool, options?: { signal?: AbortSignal }) => void | Promise<void> };
-  }
-}
-
-function inlineMarkup(text: string) {
-  return text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g).map((part, index) => {
-    if (part.startsWith('**') && part.endsWith('**')) return <strong key={index}>{part.slice(2, -2)}</strong>;
-    if (part.startsWith('*') && part.endsWith('*')) return <em key={index}>{part.slice(1, -1)}</em>;
-    return <Fragment key={index}>{part}</Fragment>;
-  });
-}
+type InspectorTab = PanelMode;
 
 export default function ManuscriptWorkspace({ initialManuscript, documentId, initialVersion = '' }: {
   initialManuscript?: Manuscript; documentId?: string; initialVersion?: string;
@@ -59,7 +40,7 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
   const startingManuscript = initialManuscript ?? {
     name: t('initial.name'), theme: 'royal' as const, activeId: 'page-1',
     pages: [
-      { id: 'page-1', title: t('initial.page1Title'), body: t('initial.page1Body'), align: 'left' as const },
+      { id: 'page-1', title: t('initial.page1Title'), body: t('initial.page1Body'), align: 'left' as const, decorations: [{ id: 'sample-seal', asset: 'wax-seal' as const, x: 425, y: 652, size: 118, rotation: -8, opacity: 1, locked: false, layer: 'front' as const }] },
       { id: 'page-2', title: t('initial.page2Title'), body: t('initial.page2Body'), align: 'left' as const },
     ],
   };
@@ -75,19 +56,20 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
   const version = useRef(initialVersion);
   const latestDraft = useRef(manuscript);
   useEffect(() => { latestDraft.current = manuscript; }, [manuscript]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [snapping, setSnapping] = useState(true);
   const [zoom, setZoom] = useState(78);
   const [pagesOpen, setPagesOpen] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(true);
-  const [inspectorTab, setInspectorTab] = useState<InspectorTab>('details');
+  const [inspectorTab, setInspectorTab] = useState<InspectorTab>('inspect');
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [pageOverflow, setPageOverflow] = useState(false);
   const undoStack = useRef<Manuscript[]>([]);
   const redoStack = useRef<Manuscript[]>([]);
-  const bodyRef = useRef<HTMLTextAreaElement>(null);
-  const renderedBodyRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLElement>(null);
+  const uploadTarget = useRef<{ pageId: string; replaceId?: string } | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
   const pagesPanelRef = useRef<HTMLElement>(null);
@@ -99,15 +81,33 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
   );
   const activeIndex = manuscript.pages.findIndex((page) => page.id === active.id);
 
+  const textDefaults = { kicker: t(`themes.${manuscript.theme}.label`), signature: t('document.signature'), folio: String(activeIndex + 1) };
+  const composition = composePage(active, manuscript.theme, textDefaults, Object.fromEntries([...['background','behind','page','surface','content','above','foreground'].map(id=>[id,t(`composer.layerNames.${id}`)]), ...['kicker','title','body','signature','folio'].map(id=>[id,t(`art.textSlots.${id}`)]), ...assetIds.map(id=>[id,t(`composer.assets.${id}`)])]));
+  function changeComposition(value: Composition) {
+    const title = value.elements.find(e=>e.id==='text:title')?.text;
+    const body = value.elements.find(e=>e.id==='text:body')?.text;
+    const patch = { composition: value, ...(title!==undefined?{title:title.slice(0,120)}:{}), ...(body!==undefined?{body:body.slice(0,12000)}:{}) };
+    const candidate = {...manuscript,pages:manuscript.pages.map(p=>p.id===active.id?{...p,...patch}:p)};
+    if (!manuscriptSchema.safeParse(candidate).success) { setOperationError(t('json.tooLarge')); return; }
+    updateActive(patch);
+  }
   useEffect(() => {
-    const renderedBody = renderedBodyRef.current;
-    if (!renderedBody) return;
-    const update = () => setPageOverflow(renderedBody.offsetTop + renderedBody.scrollHeight > 650);
+    const page = pageRef.current;
+    if (!page) return;
+    const update = () => {
+      const bounds = page.getBoundingClientRect();
+      setPageOverflow(Array.from(page.querySelectorAll('[data-kind="text"]')).some(text => {
+        const rect = text.getBoundingClientRect();
+        if (!rect.width || !rect.height) return false;
+        return rect.bottom > bounds.bottom + 1 || rect.right > bounds.right + 1 || rect.left < bounds.left - 1 || rect.top < bounds.top - 1;
+      }));
+    };
     const observer = new ResizeObserver(update);
-    observer.observe(renderedBody);
-    if (pageRef.current) observer.observe(pageRef.current);
+    observer.observe(page);
+    page.querySelectorAll('[data-kind="text"]').forEach(text => observer.observe(text));
+    update();
     return () => observer.disconnect();
-  }, [active.body, active.id, active.image, active.title, manuscript.theme]);
+  }, [active, manuscript.theme, zoom]);
 
   const isCompactWorkspace = () => window.matchMedia('(max-width: 640px)').matches;
 
@@ -154,7 +154,8 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
         const raw = window.localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed: unknown = JSON.parse(raw);
-          if (validManuscript(parsed)) setManuscript(parsed);
+          const restored = parseManuscriptExport(parsed);
+          if (restored) setManuscript(restored);
         }
       } catch { /* An unreadable local draft falls back to the example. */ }
       setHydrated(true);
@@ -166,7 +167,7 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
     if (!hydrated || saved || saving || saveError) return;
     const timer = window.setTimeout(() => {
       if (!documentId) {
-        try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(manuscript)); setSaved(true); }
+        try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(exportManuscript(manuscript))); setSaved(true); }
         catch { setSaveError(t('save.localFailure')); }
         return;
       }
@@ -209,7 +210,14 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
   function updateActive(patch: Partial<Page>) {
     commit((current) => ({
       ...current,
-      pages: current.pages.map((page) => page.id === current.activeId ? { ...page, ...patch } : page),
+      pages: current.pages.map((page) => {
+        if (page.id !== current.activeId) return page;
+        const textLayout = patch.textLayout ?? page.textLayout;
+        return { ...page, ...patch,
+          ...(patch.align && textLayout?.body ? { textLayout: { ...textLayout, body: { ...textLayout.body, align: patch.align } } } : {}),
+          ...(patch.decorations ? { artworkVersion: 3 as const, image: undefined, ...(page.image ? { textLayout: { ...textLayout, body: getTextLayout(page, 'body', current.theme) } } : {}) } : {}),
+        };
+      }),
     }));
   }
 
@@ -243,9 +251,9 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
 
   function addPage() {
     const id = crypto.randomUUID();
-    commit((current) => ({ ...current, activeId: id, pages: [...current.pages, { id, title: t('initial.untitled'), body: t('initial.begin'), align: 'left' }] }));
+    commit((current) => ({ ...current, activeId: id, pages: [...current.pages, { id, title: t('initial.untitled'), body: t('initial.begin'), align: 'left', composition: blankComposition(t('initial.untitled'),t('initial.begin'),Object.fromEntries(['background','behind','page','surface','content','above','foreground'].map(id=>[id,t(`composer.layerNames.${id}`)]))) }] }));
     if (!isCompactWorkspace()) setPagesOpen(true);
-    openInspector('details');
+    openInspector('inspect');
   }
 
   function deletePage() {
@@ -257,24 +265,37 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
     });
   }
 
-  function wrapSelection(mark: '*' | '**') {
-    const field = bodyRef.current;
-    if (!field) return;
-    const start = field.selectionStart; const end = field.selectionEnd;
-    const selected = active.body.slice(start, end) || (mark === '**' ? t('inspector.boldText') : t('inspector.italicText'));
-    const body = `${active.body.slice(0, start)}${mark}${selected}${mark}${active.body.slice(end)}`;
-    updateActive({ body });
-    requestAnimationFrame(() => { field.focus(); field.setSelectionRange(start + mark.length, start + mark.length + selected.length); });
+  function beginArtworkUpload(replaceId?: string) {
+    uploadTarget.current = { pageId: active.id, replaceId };
+    imageInputRef.current?.click();
   }
 
   function chooseImage(file?: File) {
-    if (!file) return;
+    const target = uploadTarget.current;
+    if (!file || !target) return;
     if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type) || file.size > 700_000) {
-      setOperationError(t('image.invalid'));
-      return;
+      setOperationError(t('image.invalid')); return;
     }
     const reader = new FileReader();
-    reader.onload = () => { if (typeof reader.result === 'string') updateActive({ image: reader.result }); };
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') return;
+      const image = reader.result;
+      const current = latestDraft.current;
+      const page = current.pages.find(page => page.id === target.pageId);
+      if (!page) return;
+      const c = composePage(page,current.theme,textDefaults,Object.fromEntries([...['background','behind','page','surface','content','above','foreground'].map(id=>[id,t(`composer.layerNames.${id}`)]),...assetIds.map(id=>[id,t(`composer.assets.${id}`)])]));
+      const selected = c.elements.find(item=>item.id===target.replaceId);
+      if ((selected&&!canEdit(c,selected))||(!selected&&c.elements.length>=100)) return;
+      const layer = c.layers.find(l=>l.id==='content'&&!l.locked)??c.layers.find(l=>!l.locked);
+      if (!layer) return;
+      const id=selected?.id??crypto.randomUUID();
+      const elements=selected?c.elements.map(item=>item.id===id?{...item,kind:'image' as const,asset:'uploaded' as const,image}:item):[...c.elements,{...baseElement,id,name:t('composer.assets.uploaded'),kind:'image' as const,asset:'uploaded' as const,image,layerId:layer.id,x:170,y:280,width:220,height:220}];
+      const updated={...page,composition:{...c,elements}};
+      const candidate={...current,pages:current.pages.map(p=>p.id===page.id?updated:p)};
+      if(!manuscriptSchema.safeParse(candidate).success){setOperationError(t('json.tooLarge'));return;}
+      commit(()=>candidate);setSelectedIds([id]);setInspectorTab('inspect');
+
+    };
     reader.onerror = () => setOperationError(t('image.invalid'));
     reader.readAsDataURL(file);
   }
@@ -282,9 +303,12 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
   async function exportPng() {
     const page = pageRef.current;
     if (!page || exporting) return;
+    if (pageOverflow) { setOperationError(t('inspector.overflow')); return; }
     setExporting(true);
     try {
       if (document.fonts?.ready) await document.fonts.ready;
+      await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      await Promise.all(Array.from(page.querySelectorAll('img')).map(image => image.decode()));
       const dataUrl = await toPng(page, {
         width: 560,
         height: 792,
@@ -330,42 +354,6 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
     }
   }
 
-  useEffect(() => {
-    const context = document.modelContext;
-    if (!context?.registerTool) return;
-    const lifecycle = new AbortController();
-    const register = (tool: WebMcpTool) => {
-      try { void Promise.resolve(context.registerTool(tool, { signal: lifecycle.signal })).catch(() => undefined); } catch { /* optional API */ }
-    };
-    register({
-      name: 'set_manuscript_style', title: 'Set manuscript style',
-      description: 'Change the visible manuscript to an available presentation style.',
-      inputSchema: { type: 'object', properties: { style: { type: 'string', enum: Object.keys(themes) } }, required: ['style'], additionalProperties: false },
-      annotations: { readOnlyHint: false, untrustedContentHint: false },
-      execute(input) {
-        const style = (input as { style?: string })?.style;
-        if (!style || !(style in themes)) throw new Error('Unknown manuscript style');
-        commit((current) => ({ ...current, theme: style as ThemeId }));
-        return { style, name: themes[style as ThemeId].name };
-      },
-    });
-    register({
-      name: 'update_active_page', title: 'Update active manuscript page',
-      description: 'Replace the title and/or body of the page currently open in the editor.',
-      inputSchema: { type: 'object', properties: { title: { type: 'string', maxLength: 120 }, body: { type: 'string', maxLength: 12000 } }, additionalProperties: false },
-      annotations: { readOnlyHint: false, untrustedContentHint: true },
-      execute(input) {
-        const value = input as { title?: unknown; body?: unknown }; const patch: Partial<Page> = {};
-        if (typeof value.title === 'string') patch.title = value.title;
-        if (typeof value.body === 'string') patch.body = value.body;
-        if (!Object.keys(patch).length) throw new Error('Provide a title or body');
-        updateActive(patch); return { pageId: active.id, updated: Object.keys(patch) };
-      },
-    });
-    return () => lifecycle.abort();
-  // The browser tool registrations are replaced only when the active page changes.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active.id]);
 
   return (
     <main className="app-shell" onClickCapture={event => {
@@ -400,17 +388,12 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
             onImportJson={() => importInputRef.current?.click()}
             onFitView={fitPage}
             exporting={exporting}
-            extra={(
-              <button
-                type="button"
-                className="workspace-settings flex items-center gap-1.5 rounded px-2 py-1 text-xs text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
-                title={t('toolbar.settings')}
-                aria-label={t('toolbar.settings')}
-                onClick={() => openInspector('style')}
-              >
-                <Settings className="h-3.5 w-3.5" /><span>{t('toolbar.settings')}</span>
-              </button>
-            )}
+            extra={<>
+              <button type="button" className="composer-tool" title={t('composer.insert')} aria-label={t('composer.insert')} onClick={()=>openInspector('insert')}><Plus size={14}/></button>
+              <button type="button" className="composer-tool" title={t('composer.layers')} aria-label={t('composer.layers')} onClick={()=>openInspector('layers')}><Layers size={14}/></button>
+              <button type="button" className="composer-tool" title={t('composer.snapHelp')} aria-label={t('composer.snap')} aria-pressed={snapping} onClick={()=>setSnapping(!snapping)}><Magnet size={14}/></button>
+            </>}
+
           />
 
           <div className="identity-chip floating-chrome">
@@ -433,8 +416,8 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
             <header><div><strong>{t('pages.heading')}</strong><span>{t('pages.count',{count:manuscript.pages.length})}</span></div><button onClick={() => setPagesOpen(false)} aria-label={t('pages.close')}><X /></button></header>
             <div className="page-list">
               {manuscript.pages.map((page, index) => (
-                <button aria-label={t('pages.open',{number:index+1,title:page.title})} key={page.id} className={`page-item ${page.id === active.id ? 'active' : ''}`} onClick={() => setManuscript((current) => ({ ...current, activeId: page.id }))}>
-                  <span className={`page-thumbnail theme-${manuscript.theme}`}><i /><b /><b /><b /></span>
+                <button aria-label={t('pages.open',{number:index+1,title:page.title})} key={page.id} className={`page-item ${page.id === active.id ? 'active' : ''}`} onClick={() => { setSelectedIds([]); setManuscript((current) => ({ ...current, activeId: page.id })); }}>
+                  <span className={`page-thumbnail theme-${manuscript.theme}`} style={{ backgroundImage: `url(${artPath(page.composition?.elements.find(e=>e.id===page.composition?.surfaceId)?.asset??`${manuscript.theme}-${page.paperVariant ?? 'clean'}`)})`, backgroundSize: 'cover' }}><i /><b /><b /><b /></span>
                   <span className="page-caption"><strong>{String(index + 1).padStart(2, '0')}</strong><span>{page.title}</span></span>
                 </button>
               ))}
@@ -444,25 +427,19 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
         )}
 
         <div className={`page-stage ${inspectorOpen ? 'inspector-visible' : ''} ${pagesOpen ? 'pages-visible' : ''}`}>
-          <article
-            ref={pageRef}
-            className={`manuscript-page theme-${manuscript.theme}`}
-            style={{ transform: `scale(${zoom / 100})`, marginBottom: `${792 * (zoom / 100 - 1)}px` }}
-          >
-            <div className="paper-noise" />
-            <div className="ornament ornament-top"><span>✦</span></div>
-            <p className="manuscript-kicker">{t(`themes.${manuscript.theme}.label`)}</p>
-            <h2>{active.title}</h2>
-            <div className="title-rule"><span /></div>
-            {active.image && <Image unoptimized width={404} height={210} className="manuscript-image" src={active.image} alt={t('image.uploadedAlt')} />}
-            <div ref={renderedBodyRef} className="manuscript-body" style={{ textAlign: active.align }}>
-              {active.body.split('\n').map((line, index) => line ? <p key={index}>{inlineMarkup(line)}</p> : <div className="paragraph-gap" key={index} />)}
-            </div>
-            <div className="seal" aria-label={t('document.seal')}><span>BM</span></div>
-            <p className="signature">{t('document.signature')}</p>
-            <div className="ornament ornament-bottom"><span>✦</span></div>
-            <span className="folio">{activeIndex + 1}</span>
-          </article>
+          <div className="page-frame" style={{ width: 560 * zoom / 100, height: 792 * zoom / 100 }}>
+            <article
+              ref={pageRef}
+              className="manuscript-page composition-page"
+              onKeyDown={event => { if (event.key === 'Escape') setSelectedIds([]); }}
+              onPointerDown={event => { if (event.target === event.currentTarget) setSelectedIds([]); }}
+              data-exporting={exporting}
+              style={{ transform: `scale(${zoom / 100})` }}
+            >
+              <CompositionCanvas key={active.id} value={composition} selected={selectedIds} snap={snapping} onSelect={ids=>{setSelectedIds(ids);setInspectorTab('inspect');}} onChange={changeComposition}/>
+
+            </article>
+          </div>
         </div>
 
         <div className="zoom-stack floating-chrome" aria-label={t('aria.zoom')}>
@@ -478,55 +455,11 @@ export default function ManuscriptWorkspace({ initialManuscript, documentId, ini
             <header><div><strong>{active.title || t('initial.untitled')}</strong><span>{t('inspector.page',{number:activeIndex+1})}</span></div><button onClick={() => setInspectorOpen(false)} aria-label={t('inspector.close')}><X /></button></header>
             <Tabs value={inspectorTab} onValueChange={(value) => setInspectorTab(value as InspectorTab)} className="inspector-tabs-root">
               <TabsList variant="line" className="inspector-tabs">
-                <TabsTrigger value="details">{t('inspector.tabs.details')}</TabsTrigger><TabsTrigger value="style">{t('inspector.tabs.style')}</TabsTrigger><TabsTrigger value="page">{t('inspector.tabs.page')}</TabsTrigger>
+                {(['inspect','insert','layers'] as const).map(mode=><TabsTrigger key={mode} value={mode}>{t(`composer.${mode}`)}</TabsTrigger>)}
               </TabsList>
-              <form className="inspector-form" onSubmit={(event) => event.preventDefault()}>
-                <TabsContent value="details" className="inspector-content">
-                  <Field label={t('inspector.title')}><input aria-label={t('inspector.title')} value={active.title} maxLength={120} onChange={(event) => updateActive({ title: event.target.value })} /></Field>
-                  <Field label={t('inspector.body')}>
-                    <div className="format-row">
-                      <button type="button" onClick={() => wrapSelection('**')} title={t('inspector.bold')} aria-label={t('inspector.bold')}><strong>B</strong></button>
-                      <button type="button" onClick={() => wrapSelection('*')} title={t('inspector.italic')} aria-label={t('inspector.italic')}><Italic /></button>
-                      <span />
-                      <button type="button" className={active.align === 'left' ? 'active' : ''} onClick={() => updateActive({ align: 'left' })} title={t('inspector.alignLeft')} aria-label={t('inspector.alignLeft')} aria-pressed={active.align === 'left'}><AlignLeft /></button>
-                      <button type="button" className={active.align === 'center' ? 'active' : ''} onClick={() => updateActive({ align: 'center' })} title={t('inspector.alignCenter')} aria-label={t('inspector.alignCenter')} aria-pressed={active.align === 'center'}><AlignCenter /></button>
-                      <button type="button" className={active.align === 'right' ? 'active' : ''} onClick={() => updateActive({ align: 'right' })} title={t('inspector.alignRight')} aria-label={t('inspector.alignRight')} aria-pressed={active.align === 'right'}><AlignRight /></button>
-                    </div>
-                    <textarea ref={bodyRef} aria-label={t('inspector.body')} value={active.body} maxLength={12000} onChange={(event) => updateActive({ body: event.target.value })} rows={10} />
-                    <small>{t('inspector.characters',{count:active.body.length})}</small>
-                    {pageOverflow && <small role="alert" className="page-overflow-warning">{t('inspector.overflow')}</small>}
-                  </Field>
-                  <Field label={t('image.label')}>
-                    {active.image ? (
-                      <div className="image-control"><Image unoptimized width={258} height={110} src={active.image} alt={t('image.currentAlt')} /><button type="button" onClick={() => updateActive({ image: undefined })}><Trash2 /> {t('image.remove')}</button></div>
-                    ) : (
-                      <button type="button" className="upload-button" aria-label={t('image.add')} onClick={() => imageInputRef.current?.click()}><ImagePlus /> {t('image.add')}</button>
-                    )}
-                  </Field>
-                </TabsContent>
-                <TabsContent value="style" className="inspector-content">
-                  <Field label={t('inspector.style')}>
-                    <Select value={manuscript.theme} onValueChange={(value) => commit((current) => ({ ...current, theme: value as ThemeId }))}>
-                      <SelectTrigger className="theme-select" aria-label={t('inspector.style')}><SelectValue /></SelectTrigger>
-                      <SelectContent>{Object.keys(themes).map((id) => <SelectItem key={id} value={id}>{t(`themes.${id as ThemeId}.name`)}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </Field>
-                  <div className="theme-cards">
-                    {(Object.entries(themes) as [ThemeId, (typeof themes)[ThemeId]][]).map(([id]) => (
-                      <button type="button" aria-label={t('inspector.useStyle',{style:t(`themes.${id}.name`)})} key={id} className={manuscript.theme === id ? 'selected' : ''} onClick={() => commit((current) => ({ ...current, theme: id }))}>
-                        <span className={`theme-swatch theme-${id}`} /><span><strong>{t(`themes.${id}.name`)}</strong><small>{t(`themes.${id}.family`)}</small></span>
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-6 border-t border-zinc-800 pt-4">
-                    <p className="mb-3 text-xs font-medium text-zinc-400">{t('inspector.about')}</p>
-                    <LegalLinks />
-                  </div>
-                </TabsContent>
-                <TabsContent value="page" className="inspector-content">
-                  <Field label={t('inspector.name')}><input aria-label={t('inspector.name')} value={manuscript.name} maxLength={80} onChange={(event) => commit((current) => ({ ...current, name: event.target.value }))} /></Field>
-                  <Field label={t('inspector.format')}><div className="property-row"><span>{t('inspector.pageSize')}</span><strong>{t('inspector.portrait')}</strong></div><div className="property-row"><span>{t('inspector.numbering')}</span><strong>{t('inspector.visible')}</strong></div></Field>
-                </TabsContent>
+              <form className="inspector-form" onSubmit={event=>event.preventDefault()}>
+                {(['inspect','insert','layers'] as const).map(mode=><TabsContent key={mode} value={mode} className="inspector-content"><CompositionPanel documentColors={manuscript.pages.flatMap(p=>(p.composition?.elements??[]).filter(e=>e.kind==='text').map(e=>({color:e.color,opacity:e.opacity})))} value={composition} selected={selectedIds} onSelect={setSelectedIds} onChange={changeComposition} mode={mode} onMode={setInspectorTab} onUpload={beginArtworkUpload}/>{mode==='inspect'&&!selectedIds.length&&<><Field label={t('inspector.name')}><input aria-label={t('inspector.name')} value={manuscript.name} maxLength={80} onChange={event=>commit(current=>({...current,name:event.target.value}))}/></Field><details className="composer-about"><summary>{t('inspector.about')}</summary><LegalLinks/></details></>}{pageOverflow&&<p role="alert" className="page-overflow-warning">{t('inspector.overflow')}</p>}</TabsContent>)}
+
                 <footer><button type="button" className="saved-button" disabled><Check /> {saveError ? t('save.notSaved') : saved ? t('save.saved') : t('save.saving')}</button><button type="button" className="trash-button" disabled={manuscript.pages.length === 1} onClick={deletePage} aria-label={t('inspector.delete')}><Trash2 /></button></footer>
               </form>
             </Tabs>

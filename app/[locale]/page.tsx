@@ -11,7 +11,7 @@ import { serializeJsonLd, SITE_URL } from "@/lib/site";
 type Copy = { title: string; body: string };
 type Faq = { q: string; a: string };
 const icons = [FileText, Palette, Download, Cloud];
-const styleIds = ["royal", "arcane", "dossier", "datapad"] as const;
+const styleIds = ["scroll-object", "tablet-object", "notebook-object", "dossier-clean"] as const;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -23,7 +23,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("home");
-  const theme = await getTranslations("workspace.themes");
+  const theme = await getTranslations("workspace.composer.assets");
   const features = t.raw("features.items") as Copy[];
   const faq = t.raw("faq.items") as Faq[];
   const faqJsonLd = { "@context": "https://schema.org", "@type": "FAQPage", name: t("faq.jsonLdName"), mainEntity: faq.map((item) => ({ "@type": "Question", name: item.q, acceptedAnswer: { "@type": "Answer", text: item.a } })) };
@@ -57,7 +57,7 @@ export default async function LandingPage({ params }: { params: Promise<{ locale
         </div>
       </section>
       <section id="features" className="border-t border-zinc-900 px-6 py-16"><div className="mx-auto max-w-4xl"><p className="font-mono text-[10px] uppercase tracking-[.2em] text-accent">{t("features.eyebrow")}</p><h2 className="mt-4 text-2xl font-semibold tracking-tight">{t("features.heading")}</h2><div className="mt-8 grid gap-6 sm:grid-cols-2">{features.map(({title,body}, index) => { const Icon = icons[index]; return <div key={title} className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-5"><Icon size={20} className="mb-4 text-zinc-400"/><h3 className="text-base font-medium">{title}</h3><p className="mt-2 text-sm leading-relaxed text-zinc-400">{body}</p></div>; })}</div></div></section>
-      <section className="border-t border-zinc-900 px-6 py-16"><div className="mx-auto max-w-4xl"><h2 className="text-2xl font-semibold tracking-tight">{t("styles.heading")}</h2><p className="mt-4 text-zinc-400">{t("styles.body")}</p><div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">{styleIds.map((id) => <Link href="/workspace" key={id} className="group"><div className={`landing-style theme-${id}`}><span>{theme(`${id}.label`)}</span><div/><div/><div/><b>✦</b></div><h3 className="mt-4 text-sm text-zinc-300 group-hover:text-white">{theme(`${id}.name`)}</h3></Link>)}</div></div></section>
+      <section className="border-t border-zinc-900 px-6 py-16"><div className="mx-auto max-w-4xl"><h2 className="text-2xl font-semibold tracking-tight">{t("styles.heading")}</h2><p className="mt-4 text-zinc-400">{t("styles.body")}</p><div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">{styleIds.map((id) => <Link href="/workspace" key={id} className="group"><Image unoptimized width={280} height={396} className="h-64 w-full object-contain" src={`/art/${id}.png`} alt=""/><h3 className="mt-4 text-sm text-zinc-300 group-hover:text-white">{theme(id)}</h3></Link>)}</div></div></section>
       <section id="faq" className="border-t border-zinc-900 px-6 py-16"><div className="mx-auto max-w-3xl"><h2 className="mb-8 text-2xl font-semibold tracking-tight">{t("faq.heading")}</h2>{faq.map(({q,a}) => <details key={q} className="border-b border-zinc-800 py-5"><summary className="cursor-pointer text-sm font-medium text-zinc-200">{q}</summary><p className="mt-3 text-sm leading-relaxed text-zinc-400">{a}</p></details>)}</div></section>
       <section className="border-t border-zinc-900 px-6 py-16 text-center"><h2 className="text-2xl font-semibold tracking-tight">{t("closing.heading")}</h2><Link href="/workspace" className="mt-7 inline-flex h-[42px] items-center justify-center rounded-md bg-zinc-100 px-6 text-sm font-medium text-zinc-900 hover:bg-white">{t("closing.cta")}</Link></section>
     </main><Footer currentTool="Manuscript Builder"/>

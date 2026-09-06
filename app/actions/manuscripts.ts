@@ -8,6 +8,7 @@ import type { Locale } from '@/i18n/routing';
 import { getAuthUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { blankManuscript, exportManuscript, manuscriptSchema, type Manuscript, type ThemeId } from '@/lib/manuscript-data';
+import { blankComposition } from '@/lib/composition';
 import { writeOwnedManuscript } from '@/lib/manuscript-repository';
 
 export async function createManuscript(_state: { error: string } | null, form: FormData) {
@@ -19,6 +20,8 @@ export async function createManuscript(_state: { error: string } | null, form: F
   const candidate = blankManuscript(name, theme);
   candidate.pages[0].title = t('untitled');
   candidate.pages[0].body = t('begin');
+  const editor = await getTranslations('workspace.composer');
+  candidate.pages[0].composition = blankComposition(t('untitled'),t('begin'),Object.fromEntries(['background','behind','page','surface','content','above','foreground'].map(id=>[id,editor(`layerNames.${id}`)])));
   const parsed = manuscriptSchema.safeParse(candidate);
   if (!parsed.success) return { error: t('invalidCreate') };
   let id: string;
