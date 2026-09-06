@@ -1,0 +1,154 @@
+{
+  "royal-paper": [
+    1024,
+    1536
+  ],
+  "datapad-paper": [
+    1024,
+    1536
+  ],
+  "arcane-paper": [
+    1024,
+    1536
+  ],
+  "arcane-sigil": [
+    1254,
+    1254
+  ],
+  "royal-fold": [
+    1024,
+    1536
+  ],
+  "dossier-worn": [
+    1024,
+    1536
+  ],
+  "tablet-object": [
+    1055,
+    1491
+  ],
+  "pressed-flower": [
+    1024,
+    1536
+  ],
+  "datapad-divider": [
+    2172,
+    724
+  ],
+  "ribbon-tail": [
+    1240,
+    1269
+  ],
+  "wax-seal": [
+    1254,
+    1254
+  ],
+  "circuit-module": [
+    1536,
+    1024
+  ],
+  "royal-worn": [
+    1024,
+    1536
+  ],
+  "binder-clip": [
+    1536,
+    1024
+  ],
+  "dossier-paper": [
+    1024,
+    1536
+  ],
+  "dossier-coffee": [
+    1309,
+    1201
+  ],
+  "datapad-clean": [
+    1024,
+    1536
+  ],
+  "polaroid-frame": [
+    1230,
+    1278
+  ],
+  "royal-divider": [
+    2172,
+    724
+  ],
+  "royal-clean": [
+    1024,
+    1536
+  ],
+  "dossier-divider": [
+    2172,
+    724
+  ],
+  "notebook-object": [
+    1055,
+    1491
+  ],
+  "arcane-divider": [
+    2172,
+    724
+  ],
+  "arcane-clean": [
+    1024,
+    1536
+  ],
+  "brass-key": [
+    1536,
+    1024
+  ],
+  "arcane-worn": [
+    1024,
+    1536
+  ],
+  "datapad-damage": [
+    1672,
+    941
+  ],
+  "arcane-scorch": [
+    1536,
+    1024
+  ],
+  "royal-floral": [
+    1254,
+    1254
+  ],
+  "evidence-tape": [
+    1254,
+    1254
+  ],
+  "datapad-worn": [
+    1024,
+    1536
+  ],
+  "dossier-clean": [
+    1024,
+    1536
+  ],
+  "glass-crack": [
+    1254,
+    1254
+  ],
+  "paperclip": [
+    1536,
+    1024
+  ],
+  "scroll-object": [
+    1055,
+    1491
+  ],
+  "postage-stamp": [
+    1241,
+    1268
+  ],
+  "torn-note": [
+    1536,
+    1024
+  ],
+  "blood-stain": [
+    1254,
+    1254
+  ]
+}
