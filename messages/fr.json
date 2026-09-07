@@ -120,7 +120,7 @@
           "de créer ou partager un contenu illégal, préjudiciable, diffamatoire, haineux, incitant à la violence ou portant atteinte aux droits de tiers ;",
           "de perturber, ralentir ou tenter d'intrusion dans les systèmes ou infrastructures des Outils ;",
           "de contourner les dispositifs de sécurité ou d'authentification ;",
-          "de revendre, monnayer ou concéder l'accès aux Outils."
+          "vendre sans autorisation l’accès à notre service hébergé, ou présenter à tort un service tiers comme étant exploité ou approuvé par nous. Cette règle n’interdit pas de distribuer, vendre ou héberger indépendamment des copies du logiciel dans les conditions de sa licence MIT."
         ]
       },
       "s9": {
@@ -129,7 +129,7 @@
       },
       "s10": {
         "heading": "10. Propriété intellectuelle",
-        "p1": "Nous demeurons titulaires des droits de propriété intellectuelle sur les Outils. Les présentes CGU n'opèrent aucun transfert de ces droits à votre bénéfice, en dehors d'un droit d'utilisation personnel et non exclusif limité à la durée de votre utilisation."
+        "p1": "Les droits d’auteur sur les outils restent détenus par leurs titulaires respectifs. Leur code source public est diffusé sous licence MIT. Les autorisations et conditions du fichier LICENSE du dépôt régissent la réutilisation du logiciel couvert, y compris à des fins commerciales. Les présentes CGU régissent l’utilisation de notre service hébergé et ne restreignent pas les droits accordés par la licence MIT ou par une autre licence applicable aux éléments de tiers."
       },
       "s11": {
         "heading": "11. Responsabilité",
@@ -180,8 +180,9 @@
       },
       "ip": {
         "heading": "Propriété intellectuelle",
-        "p1": "Toutes les marques, textes, illustrations, images ainsi que les applications informatiques qui composent le Site sont protégés au titre de la propriété intellectuelle et sont la propriété de l'Éditeur, sauf mentions particulières. Toute reproduction, représentation ou adaptation, en tout ou partie, sans l'accord préalable et écrit de l'Éditeur, est strictement interdite.",
-        "p2": "Les données que vous créez au sein d'un outil (par exemple vos manuscrits et illustrations) vous appartiennent et ne sont pas revendiquées par l'Éditeur."
+        "p1": "Les outils sont des logiciels libres diffusés sous licence MIT, dont le code source est disponible dans leurs dépôts publics. Les droits d’auteur restent détenus par leurs titulaires respectifs. La licence MIT autorise l’utilisation, la copie, la modification, la distribution et la réutilisation commerciale du logiciel couvert, sous réserve de conserver les mentions de droits d’auteur et d’autorisation requises. Aucune autorisation écrite supplémentaire de l’Éditeur n’est nécessaire pour les usages permis par cette licence. Consultez le fichier LICENSE de chaque dépôt et les mentions relatives aux tiers pour connaître les conditions applicables.",
+        "p2": "Les données que vous créez au sein d'un outil (par exemple vos manuscrits et illustrations) vous appartiennent et ne sont pas revendiquées par l'Éditeur.",
+        "p3": "Les composants et ressources de tiers peuvent relever de leurs propres licences, indiquées dans les dépôts. La licence du logiciel n’accorde aucun droit sur les marques ni aucune autorisation de laisser entendre que l’Éditeur approuve un autre produit ou service. Ces conditions ne retirent aucun droit déjà accordé par une licence libre applicable."
       },
       "links": {
         "heading": "Liens hypertextes",
@@ -191,7 +192,7 @@
     "privacy": {
       "title": "Charte de Confidentialité",
       "metaTitle": "Charte de Confidentialité · Bag Of Holding Tools",
-      "updated": "Août 2026",
+      "updated": "Septembre 2026",
       "preamble": {
         "heading": "Préambule",
         "p1": "La présente charte s'applique à l'ensemble des outils publiés sous Bag Of Holding Tools, dont Manuscript Builder. Tous les outils partagent le même système de compte, une seule charte les couvre donc tous. Elle a pour objet de vous expliquer comment sont collectées, traitées et conservées vos données à caractère personnel, conformément à la loi n° 78-17 du 6 janvier 1978 (« Informatique et Libertés ») et au règlement (UE) 2016/679 (« RGPD »)."
@@ -212,12 +213,13 @@
       },
       "s4": {
         "heading": "4. Données collectées et finalités (mode compte)",
-        "p1": "La création d'un compte est facultative et sert uniquement à sauvegarder votre travail dans le cloud. Lorsque vous vous connectez avec Google, nous collectons :",
+        "p1": "Le compte est facultatif et sert à sauvegarder votre travail dans le cloud pour le reprendre sur un autre appareil. La connexion avec Google transmet des informations de compte à notre service d’authentification ; la sauvegarde dans votre compte transmet en plus le contenu que vous choisissez de conserver :",
         "items": [
-          "Votre adresse email (fournie par Google) ;",
-          "Les données que vous créez dans chaque outil (par ex. manuscrits, pages, textes, mise en forme et illustrations pour Manuscript Builder)."
+          "Votre adresse email et votre identifiant d’authentification, utilisés pour reconnaître votre compte partagé ;",
+          "Les métadonnées de profil Google reçues et conservées par Supabase Auth lors de la connexion, notamment l’URL de votre photo de profil et, lorsqu’il est fourni par Google, votre nom ;",
+          "Le contenu créatif que vous choisissez d’enregistrer dans votre compte, notamment du texte, des images, des données structurées de projet et les paramètres nécessaires pour retrouver votre travail."
         ],
-        "p2": "Nous ne collectons ni votre nom, ni votre photo de profil, ni aucune autre donnée de votre compte Google au-delà de votre adresse email. La base juridique de ces traitements est l'exécution du contrat que vous concluez en créant un compte. Vos données servent exclusivement à vous identifier et à vous permettre d'accéder à votre travail entre vos sessions et appareils."
+        "p2": "La fiche de compte de nos applications utilise votre adresse email et votre identifiant d’authentification. Les outils et le site n’affichent pas votre photo de profil Google ni votre nom, n’analysent pas la photo et ne recopient pas ces champs de profil dans la fiche de compte applicative. Ces champs peuvent néanmoins rester dans les métadonnées d’authentification conservées par Supabase Auth : ne pas les afficher ne signifie pas qu’ils ne sont ni collectés ni conservés. Les traitements nécessaires pour vous authentifier et assurer la sauvegarde cloud demandée reposent sur l’exécution du contrat de service du compte."
       },
       "s5": {
         "heading": "5. Destinataires et sous-traitants",
@@ -230,7 +232,8 @@
       },
       "s6": {
         "heading": "6. Durée de conservation",
-        "p1": "Vos données de compte sont conservées tant que votre compte existe. Vous pouvez demander la suppression de votre compte et de toutes les données associées à tout moment en écrivant à <mail>{email}</mail>. La suppression est définitive."
+        "p1": "Vos données de compte sont conservées tant que votre compte existe. Vous pouvez demander la suppression de votre compte et de toutes les données associées à tout moment en écrivant à <mail>{email}</mail>. La suppression est définitive.",
+        "p3": "Les métadonnées de profil conservées dans Supabase Auth sont rattachées au compte d’authentification partagé. Supprimer ce compte supprime également sa fiche d’authentification, y compris ces métadonnées."
       },
       "s7": {
         "heading": "7. Sécurité",

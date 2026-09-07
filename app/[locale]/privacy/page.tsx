@@ -76,6 +76,7 @@ export default async function PrivacyPage({
 
       <Section title={t("s6.heading")}>
         <p>{t.rich("s6.p1", email)}</p>
+        <p>{t("s6.p3")}</p>
       </Section>
 
       <Section title={t("s7.heading")}>

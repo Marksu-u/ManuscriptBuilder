@@ -120,7 +120,7 @@
           "creating or sharing content that is illegal, harmful, defamatory, hateful, promotes violence, or infringes the rights of others;",
           "disrupting, slowing down or attempting to intrude into the systems or infrastructure of the Tools;",
           "circumventing security or authentication measures;",
-          "reselling, monetizing or licensing access to the Tools."
+          "selling access to our hosted service without authorization, or falsely presenting a third-party service as operated or endorsed by us. This does not prohibit distributing, selling or independently hosting copies of the software as permitted by its MIT license."
         ]
       },
       "s9": {
@@ -129,7 +129,7 @@
       },
       "s10": {
         "heading": "10. Intellectual property",
-        "p1": "We remain the owner of the intellectual property rights in the Tools. These Terms transfer none of those rights to you, other than a personal, non-exclusive right to use them for the duration of your use."
+        "p1": "Copyright in the tools remains with the respective authors. Their publicly available source code is released under the MIT license. The permissions and conditions in the repository’s LICENSE file govern reuse of the covered software, including commercial reuse. These Terms govern use of our hosted service and do not restrict rights granted by the MIT license or another applicable third-party license."
       },
       "s11": {
         "heading": "11. Liability",
@@ -180,8 +180,9 @@
       },
       "ip": {
         "heading": "Intellectual property",
-        "p1": "All trademarks, text, illustrations, images and software that make up the Site are protected under intellectual property law and are the property of the Publisher, except where otherwise stated. Any reproduction, representation or adaptation, in whole or in part, without the Publisher's prior written consent, is strictly prohibited.",
-        "p2": "The data you create within a tool (for example your manuscripts and illustrations) belongs to you and is not claimed by the Publisher."
+        "p1": "The tools are open-source software released under the MIT license, with source code available in their public repositories. Copyright remains with the respective authors. The MIT license permits use, copying, modification, distribution and commercial reuse of the covered software, subject to retaining the required copyright and permission notices. No additional written permission from the Publisher is required for uses allowed by that license. Consult each repository’s LICENSE file and any accompanying third-party notices for the applicable terms.",
+        "p2": "The data you create within a tool (for example your manuscripts and illustrations) belongs to you and is not claimed by the Publisher.",
+        "p3": "Third-party components and assets may carry their own licenses, as identified in the repositories. The software license does not grant trademark rights or permission to imply endorsement by the Publisher. These terms do not withdraw rights already granted under an applicable open-source license."
       },
       "links": {
         "heading": "Hyperlinks",
@@ -191,7 +192,7 @@
     "privacy": {
       "title": "Privacy Policy",
       "metaTitle": "Privacy Policy · Bag Of Holding Tools",
-      "updated": "August 2026",
+      "updated": "September 2026",
       "preamble": {
         "heading": "Preamble",
         "p1": "This policy applies to all tools published under Bag Of Holding Tools, including Manuscript Builder. All tools share the same account system, so one policy covers all of them. It explains how your personal data is collected, processed and retained, in accordance with French Law no. 78-17 of 6 January 1978 (\"Informatique et Libertés\") and Regulation (EU) 2016/679 (\"GDPR\")."
@@ -212,12 +213,13 @@
       },
       "s4": {
         "heading": "4. Data collected and purposes (account mode)",
-        "p1": "Creating an account is optional and only exists to save your work to the cloud. When you sign in with Google, we collect:",
+        "p1": "An account is optional and serves to save your work in the cloud and continue on another device. Signing in with Google provides account information to our authentication service; saving work to your account additionally provides the content you choose to store:",
         "items": [
-          "Your email address (provided by Google);",
-          "The data you create in each tool (e.g. manuscripts, pages, text, formatting and illustrations for Manuscript Builder)."
+          "Your email address and authentication identifier, used to recognise your shared account;",
+          "Google profile metadata received and retained by Supabase Auth during sign-in, including a profile-picture URL and, when provided by Google, your name;",
+          "The creative content you choose to save to your account, such as text, images, structured project data and the settings needed to reopen your work."
         ],
-        "p2": "We do not collect your name, profile picture, or any other Google account data beyond your email address. The legal basis for this processing is the performance of the contract you enter into by creating an account. Your data is used solely to identify you and let you access your work across sessions and devices."
+        "p2": "Our application account record uses your email address and authentication identifier. The tools and the website do not display your Google profile picture or name, analyse the picture, or copy these profile fields into the application account record. Those fields can nevertheless remain in the authentication metadata held by Supabase Auth; not displaying them does not mean they are not collected or stored. The processing necessary to authenticate you and provide the cloud saving you request is based on performance of the account service contract."
       },
       "s5": {
         "heading": "5. Recipients and subprocessors",
@@ -230,7 +232,8 @@
       },
       "s6": {
         "heading": "6. Data retention",
-        "p1": "Account data is retained for as long as your account exists. You may request deletion of your account and all associated data at any time by writing to <mail>{email}</mail>. Deletion is permanent."
+        "p1": "Account data is retained for as long as your account exists. You may request deletion of your account and all associated data at any time by writing to <mail>{email}</mail>. Deletion is permanent.",
+        "p3": "Profile metadata retained in Supabase Auth is associated with the shared authentication account. Deleting that account also removes its authentication record, including this metadata."
       },
       "s7": {
         "heading": "7. Security",

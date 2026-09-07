@@ -66,6 +66,7 @@ export default async function LegalNoticePage({
       <Section title={t("ip.heading")}>
         <p>{t("ip.p1")}</p>
         <p>{t("ip.p2")}</p>
+        <p>{t("ip.p3")}</p>
       </Section>
 
       <Section title={t("links.heading")}>
